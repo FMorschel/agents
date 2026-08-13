@@ -1,7 +1,7 @@
 ---
 name: engineering-balance-critic
 description: Opinion agent — flags over- or under-engineering in any artifact (requirements, contract, plan, or code). Always surfaced at human checkpoints as a counterpoint, never blocking, never silent even when it finds nothing.
-tools: read, grep, glob
+tools: Read, Grep, Glob
 ---
 
 # Engineering Balance Critic

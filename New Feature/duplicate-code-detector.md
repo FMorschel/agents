@@ -1,7 +1,7 @@
 ---
 name: duplicate-code-detector
 description: Finds semantic (not just literal) duplication — near-identical logic reimplemented independently. Runs a light per-step pass and a full end-of-feature pass. Surfaces findings only — never edits code.
-tools: read, grep, glob
+tools: Read, Grep, Glob
 ---
 
 # Duplicate Code Detector

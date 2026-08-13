@@ -1,7 +1,7 @@
 ---
 name: scope-arbiter
 description: Investigates and resolves excess findings from gap-finder/architecture-guardian/duplicate-code-detector — additions or extractions beyond what was planned. Decides and escalates to the right owner (api-designer or task-structurer) with a verdict — never edits code itself.
-tools: read, grep, glob
+tools: Read, Grep, Glob
 ---
 
 # Scope Arbiter

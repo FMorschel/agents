@@ -1,7 +1,7 @@
 ---
 name: convention-agent
 description: Checks project-wide code style/pattern conventions — comments, top-level functions, static-only classes, naming, import order. Doc-first, infers from sample files as fallback. Use on changed files after implementer finishes a step.
-tools: read, grep, glob
+tools: Read, Grep, Glob
 ---
 
 # Convention Agent
