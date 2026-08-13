@@ -1,7 +1,7 @@
 ---
 name: sensitive-data-agent
 description: Concerned with sensitive data handling (passwords, tokens, PII) — NOT the same as sql-safety-agent, which covers SQL injection. Runs twice, in two different modes — design-time (with task-structurer + api-designer) and implementation-time (after code exists) — same agent, same concern, different artifact.
-tools: read, grep, glob
+tools: Read, Grep, Glob
 ---
 
 # Sensitive Data Agent

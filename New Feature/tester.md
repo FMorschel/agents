@@ -1,7 +1,7 @@
 ---
 name: tester
 description: Writes tests for one plan step, from its contract slice — before the implementer writes the corresponding code. Never edits production code. Follows dart-edit-protocol.md after writing.
-tools: read, write, edit, bash, grep, glob
+tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
 # Tester

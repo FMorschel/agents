@@ -1,7 +1,7 @@
 ---
 name: step-planner
 description: Takes api-designer's finalized (and now documented) contract plus the original requirements, and decomposes them into an ordered, atomic implementation plan. Use after api-doc-writer, before tester/implementer start.
-tools: read, grep, glob
+tools: Read, Grep, Glob
 ---
 
 # Step-by-Step Planner

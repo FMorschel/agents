@@ -1,7 +1,7 @@
 ---
 name: implementer
 description: Implements one plan step's production code until tester's tests pass. Never writes or edits test files. Follows dart-edit-protocol.md after writing.
-tools: read, write, edit, bash, grep, glob
+tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
 # Implementer

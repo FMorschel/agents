@@ -1,7 +1,7 @@
 ---
 name: test-adequacy-reviewer
 description: Checks whether tester's tests actually pin the business logic implementer ended up writing, not just call the API. Runs AFTER implementer, unlike tester itself — needs the finished implementation to compare against.
-tools: read, grep, glob
+tools: Read, Grep, Glob
 ---
 
 # Test Adequacy Reviewer
