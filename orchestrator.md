@@ -28,6 +28,8 @@ graph LR
     C["api-designer"]
     D["api-doc-writer"]
     E["step-planner"]
+    R{"UI-touching<br/>step?"}
+    S["ui-surface-agent"]
     F["tester"]
     G["implementer"]
     H["architecture-guardian<br/>code-smell-detector<br/>memory-safety-agent<br/>test-adequacy-reviewer<br/>convention-agent<br/>duplicate-code-detector<br/>sql-safety-agent"]
@@ -42,7 +44,10 @@ graph LR
     Q["test-writer<br/>(existing-feature entry)"]
 
     A --> B --> C --> D --> E
-    E --> F --> G --> H --> I
+    E --> R
+    R -->|yes| S --> F
+    R -->|no| F
+    F --> G --> H --> I
     Q -.-> P
     Q -.->|tests only| H
     P -.->|existing-feature entry| H
@@ -62,6 +67,7 @@ graph LR
 - API design issues → `C` (api-designer)
 - Documentation gaps → `D` (api-doc-writer)
 - Re-planning implementation only → `E` (step-planner)
+- UI surface conflicts (shortcut collisions, icon/label drift, placement inconsistency) → `E` (step-planner), to revise the planned surface before `tester`/`implementer` build against it
 
 The agent producing the feedback decision specifies which node to route to; the orchestrator does not infer it.
 
@@ -75,6 +81,8 @@ For existing-feature entry, `test-writer` gets only the target implementation. `
 
 One artifact does travel between agents rather than being re-derived: the **axis sweep** produced by `tester` (new-feature) or `test-writer` (existing-feature), per `test-case-matrix.md`. Forward it to `gap-finder` at the test stage and to `test-adequacy-reviewer` at `H`, in both cases *alongside* the tests rather than instead of them — both agents are expected to verify the sweep, not inherit it, and neither can do that without the tests it describes. This is a narrow exception to the rule above, not a licence to widen the others.
 
+`ui-surface-agent` gets only the current step's plan (from `step-planner`) — never the tester's tests or the implementer's diff, since it runs before either exists for that step. It only runs at all when the step touches UI surface (`R`); skip it entirely for backend/logic-only steps rather than calling it and expecting a no-op report.
+
 ## Retry and escalation policy
 
 - `tester ↔ implementer`: cap iterations (e.g., 3) before stopping and surfacing the failure instead of looping forever.
@@ -82,6 +90,7 @@ One artifact does travel between agents rather than being re-derived: the **axis
 - Informational-only, never blocking: `gap-finder`, `engineering-balance-critic`, `dart-modernization-agent`, `duplicate-code-detector`, `memory-safety-agent`'s savings/profiling notes (its leak findings are blocking — a real leak isn't optional).
 - `scope-arbiter`'s verdict is final in autonomous mode; in human-gated mode its proposal is what's presented at the checkpoint, not the raw finding. It never edits code itself — its output is always a decision plus a handoff to whichever agent owns the actual rework.
 - `sensitive-data-agent`'s implementation-time findings are blocking (a real exposure isn't optional, same as a leak); its design-time findings route back to `task-structurer`/`api-designer` before the contract locks.
+- `ui-surface-agent`'s conflicts (shortcut collisions, icon reuse with a different meaning, duplicate controls) are blocking — route back to `step-planner` before `tester`/`implementer` start on that step. Its consistency-gap and "no established pattern" findings are informational-only.
 - `commit-composer` proposes by default; it only stages/commits when explicitly told to execute (see its own spec) — treat that as an explicit-permission action, not an automatic one, even in autonomous mode.
 - `requirements-analyst`'s and `test-writer`'s "Needs human confirmation" checklists are informational-only, never blocking — they exist precisely because neither agent can tell a deliberate design choice from an undiscovered bug on its own. Surface both checklists in full at the existing-feature checkpoint (below); don't let a non-empty checklist stall the run.
 - Axis sweeps are informational-only, in both directions: a sweep with unaddressed axes doesn't block, and `gap-finder`'s axis findings inherit `gap-finder`'s existing non-blocking status. A *missing* sweep is different — that's an agent not following its own spec, so re-run it rather than passing the tests downstream without one.
