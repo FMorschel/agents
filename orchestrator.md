@@ -24,11 +24,13 @@ A run doesn't always start from a blank page. Pick the entry point based on what
   - CONFIRMED ends the hunt — `bug-verifier` saves the minimal repro to the [Regression Test Backlog](Bug%20Hunt/regression-test-backlog.md) for later conversion to a regression test. Hand the confirmed root cause to the user, or, if a fix is wanted:
     - **Regression test first:** route to `test-writer` (existing-feature entry) to backfill a regression test for that module before the fix goes in, using the backlog entry as the source. This creates a green-then-red-then-green test cycle: the new regression test starts failing against current code (red), the implementer fixes it (green).
     - **Then implement the fix:** route into the normal pipeline at whichever of `A`-`G` fits the size of the fix (usually straight to `implementer` for a bug fix, or through `task-structurer` if the fix involves API/contract changes).
+    - The regression test is not optional here — see [Definition of done for a fix](#definition-of-done-for-a-fix). A confirmed bug that gets fixed without one is an incomplete run, even if the fix itself is correct and the suite is green.
   - REFUTED or INCONCLUSIVE goes back to `bug-hypothesis-former` along with `bug-verifier`'s findings, to produce the next batch; repeat until confirmed or the evidence runs out.
   - Neither agent edits code or the main graph's artifacts — this loop produces a diagnosis, not a change. Only route to `A`-`G` (or `test-writer`) afterward if the user wants the confirmed bug actually fixed or tested.
 - **Narrow, single-concern request**: the user names one specific, bounded improvement — "add more test coverage here," "split this file into smaller ones," "extract this into its own module," "rename X to Y" — and wants exactly that, not a trip through the whole pipeline. No new requirements, no contract change, no plan. Route directly to the agent(s) that do that one thing, skipping `A`-`E` entirely:
   - *More coverage / cover the gaps*: run `coverage-auditor` on the target to find what's actually uncovered, then hand its findings to `tester` (or `test-writer` if the code never had structured tests) to backfill only the missing cases. Also check the [Regression Test Backlog](Bug%20Hunt/regression-test-backlog.md) — if there are pending regression tests for this module, include those alongside the coverage gaps. Follow with `test-adequacy-reviewer` to confirm the new tests pin behavior, not just touch lines.
   - *Split/reorganize into more files or folders*: this is a pure move, no behavior change — go straight to `implementer` for the mechanical reshuffle, then `architecture-guardian` and `convention-agent` to confirm the new boundaries and naming fit project layout, plus `duplicate-code-detector` if the split risked leaving near-duplicate leftovers. Existing tests are the safety net; don't route through `tester` unless the move actually changes the public contract.
+  - *Fix this bug / this is broken*: when the target is a defect rather than an improvement, the narrow route still ends at a regression test — see [Definition of done for a fix](#definition-of-done-for-a-fix). Route the fix to `implementer` and the test to `tester`/`test-writer`; "narrow" scopes down the artifact-producing stages, never the test that proves the defect is gone.
   - Either way: stay inside the stated scope. If the narrow task surfaces something that looks like it needs `task-structurer`-level rework or an API change, don't silently expand into it — surface it and let the user decide, the same way `scope-arbiter` would flag an unplanned addition in the main pipeline. Only widen into the full `A`→`G` graph if the user actually asks for that.
   - The epistemic rule and `dart-edit-protocol.md`'s clean-analyze/green-tests requirement still apply in full — narrow scope skips the artifact-producing stages (requirements, contract, plan) the request didn't ask to touch, not verification.
 
@@ -97,6 +99,22 @@ One artifact does travel between agents rather than being re-derived: the **axis
 
 `ui-surface-agent` gets only the current step's plan (from `step-planner`) — never the tester's tests or the implementer's diff, since it runs before either exists for that step. It only runs at all when the step touches UI surface (`R`); skip it entirely for backend/logic-only steps rather than calling it and expecting a no-op report.
 
+## Definition of done for a fix
+
+Any run whose purpose is to **fix something that is broken** — a confirmed bug, a failing case, a reported defect, a regression — is not complete until a regression test exists for it. This is a hard rule you enforce as router, and it applies regardless of which entry point the fix came in through (bug hunt, narrow single-concern request, or a fix routed into the main graph).
+
+The test must:
+
+- **Fail against the pre-fix code and pass against the fixed code.** If it passes both ways it isn't pinning the defect, and the fix isn't done — route it back for a real one.
+- **Live in the project's test suite**, not in a scratchpad. `bug-verifier`'s throwaway repro and the [Regression Test Backlog](Bug%20Hunt/regression-test-backlog.md) entry are the *source* for the test, never the test itself.
+- **Be written by a test-owning agent** — `tester` (new-feature flow) or `test-writer` (existing-feature flow). `implementer` never writes it; that ground rule doesn't relax for bug fixes.
+
+Ordering: write the regression test *before* the fix wherever the code is reachable enough to test — red first, then green — so the test is demonstrated to catch the defect rather than merely asserted to. Where writing it first isn't practical (the fix changes the surface the test needs), write it immediately after and verify it fails by reverting the fix locally.
+
+Do not report a fix as done, close the loop, or route to `commit-composer` while the regression test is still missing. A `dart analyze` clean run and a green existing suite are not a substitute: the existing suite is green *because* it never covered this case. Update the backlog entry's **Status** to "regression test merged" as part of closing out.
+
+**The only exception is an explicit human instruction to skip it.** The user saying "just fix it" or "quick fix" is not that instruction — it's about speed, not coverage. It has to be an actual "no test" / "skip the regression test" from the human. When they do skip it, say so plainly in the final report and leave the backlog entry at "pending regression test" rather than silently dropping it. In autonomous mode, with no human to ask, the rule holds without exception — a fix with no regression test is an incomplete run, not a finished one.
+
 ## Retry and escalation policy
 
 - `tester ↔ implementer`: cap iterations (e.g., 3) before stopping and surfacing the failure instead of looping forever.
@@ -105,6 +123,7 @@ One artifact does travel between agents rather than being re-derived: the **axis
 - `scope-arbiter`'s verdict is final in autonomous mode; in human-gated mode its proposal is what's presented at the checkpoint, not the raw finding. It never edits code itself — its output is always a decision plus a handoff to whichever agent owns the actual rework.
 - `sensitive-data-agent`'s implementation-time findings are blocking (a real exposure isn't optional, same as a leak); its design-time findings route back to `task-structurer`/`api-designer` before the contract locks.
 - `ui-surface-agent`'s conflicts (shortcut collisions, icon reuse with a different meaning, duplicate controls) are blocking — route back to `step-planner` before `tester`/`implementer` start on that step. Its consistency-gap and "no established pattern" findings are informational-only.
+- A missing regression test on a fix run is **blocking**, on the same footing as an architecture violation — see [Definition of done for a fix](#definition-of-done-for-a-fix). Only an explicit human "skip the regression test" clears it.
 - `commit-composer` proposes by default; it only stages/commits when explicitly told to execute (see its own spec) — treat that as an explicit-permission action, not an automatic one, even in autonomous mode.
 - `requirements-analyst`'s and `test-writer`'s "Needs human confirmation" checklists are informational-only, never blocking — they exist precisely because neither agent can tell a deliberate design choice from an undiscovered bug on its own. Surface both checklists in full at the existing-feature checkpoint (below); don't let a non-empty checklist stall the run.
 - Axis sweeps are informational-only, in both directions: a sweep with unaddressed axes doesn't block, and `gap-finder`'s axis findings inherit `gap-finder`'s existing non-blocking status. A *missing* sweep is different — that's an agent not following its own spec, so re-run it rather than passing the tests downstream without one.
