@@ -18,6 +18,19 @@ A run doesn't always start from a blank page. Pick the entry point based on what
   - Requirements exist (or aren't needed), tests don't → start at `test-writer` (`Q`) alone.
   - Neither exists → start at `test-writer`, then hand its tests to `requirements-analyst` (tests first — `requirements-analyst`'s own spec cross-references implementation *and* tests to tell a real requirement from an accident; without tests it's reading code in isolation and has nothing to check against).
   - Either way, once the target has both requirements and tests (reconstructed or pre-existing), join the main graph at `H`. The existing implementation stands in for `G`'s output in the new-feature flow — it's already-written code that now has the tests and requirements everything downstream assumes are present. From `H` onward (`I`→`J`→`K`→`L`→`M`→`N`→done, and all feedback-loop routing) is identical to the new-feature flow.
+- **Bug hunt**: something is broken and the task is to find *where*, not to build or restructure anything yet. Use the agents in `Bug Hunt/` as a standalone loop, independent of the graph below:
+  - Give `bug-hypothesis-former` the bug report, symptoms, logs, stack traces, or repro steps. It returns a ranked, falsifiable list of hypotheses — never a verdict.
+  - Hand its top hypothesis, one at a time, to `bug-verifier`, which reports CONFIRMED, REFUTED, or INCONCLUSIVE with evidence.
+  - CONFIRMED ends the hunt — `bug-verifier` saves the minimal repro to the [Regression Test Backlog](Bug%20Hunt/regression-test-backlog.md) for later conversion to a regression test. Hand the confirmed root cause to the user, or, if a fix is wanted:
+    - **Regression test first:** route to `test-writer` (existing-feature entry) to backfill a regression test for that module before the fix goes in, using the backlog entry as the source. This creates a green-then-red-then-green test cycle: the new regression test starts failing against current code (red), the implementer fixes it (green).
+    - **Then implement the fix:** route into the normal pipeline at whichever of `A`-`G` fits the size of the fix (usually straight to `implementer` for a bug fix, or through `task-structurer` if the fix involves API/contract changes).
+  - REFUTED or INCONCLUSIVE goes back to `bug-hypothesis-former` along with `bug-verifier`'s findings, to produce the next batch; repeat until confirmed or the evidence runs out.
+  - Neither agent edits code or the main graph's artifacts — this loop produces a diagnosis, not a change. Only route to `A`-`G` (or `test-writer`) afterward if the user wants the confirmed bug actually fixed or tested.
+- **Narrow, single-concern request**: the user names one specific, bounded improvement — "add more test coverage here," "split this file into smaller ones," "extract this into its own module," "rename X to Y" — and wants exactly that, not a trip through the whole pipeline. No new requirements, no contract change, no plan. Route directly to the agent(s) that do that one thing, skipping `A`-`E` entirely:
+  - *More coverage / cover the gaps*: run `coverage-auditor` on the target to find what's actually uncovered, then hand its findings to `tester` (or `test-writer` if the code never had structured tests) to backfill only the missing cases. Also check the [Regression Test Backlog](Bug%20Hunt/regression-test-backlog.md) — if there are pending regression tests for this module, include those alongside the coverage gaps. Follow with `test-adequacy-reviewer` to confirm the new tests pin behavior, not just touch lines.
+  - *Split/reorganize into more files or folders*: this is a pure move, no behavior change — go straight to `implementer` for the mechanical reshuffle, then `architecture-guardian` and `convention-agent` to confirm the new boundaries and naming fit project layout, plus `duplicate-code-detector` if the split risked leaving near-duplicate leftovers. Existing tests are the safety net; don't route through `tester` unless the move actually changes the public contract.
+  - Either way: stay inside the stated scope. If the narrow task surfaces something that looks like it needs `task-structurer`-level rework or an API change, don't silently expand into it — surface it and let the user decide, the same way `scope-arbiter` would flag an unplanned addition in the main pipeline. Only widen into the full `A`→`G` graph if the user actually asks for that.
+  - The epistemic rule and `dart-edit-protocol.md`'s clean-analyze/green-tests requirement still apply in full — narrow scope skips the artifact-producing stages (requirements, contract, plan) the request didn't ask to touch, not verification.
 
 ## The pipeline
 
@@ -62,6 +75,7 @@ graph LR
 ```
 
 **Feedback loop routing**: When `I` (more steps?) or `K` (findings need more steps?) respond "yes", the orchestrator routes back to whichever node in A→E is appropriate for the rework needed. The target depends on the nature of the findings:
+
 - Task restructuring → `A` (task-structurer)
 - Sensitive-data concerns → `B` (sensitive-data-agent)
 - API design issues → `C` (api-designer)
@@ -98,10 +112,12 @@ One artifact does travel between agents rather than being re-derived: the **axis
 ## Mode switch
 
 Two hard gates, checked against the current mode flag:
+
 - **Post-contract** (after `api-designer`, before `step-planner`): in human-gated mode, pause; package the contract + `engineering-balance-critic`'s counterpoint for review. Only applies to the new-feature entry — existing-feature entry has no `api-designer` contract to review.
 - **Pre-merge** (after all steps + end-of-feature passes): in human-gated mode, pause; package the final diff + all gate reports + `engineering-balance-critic`'s counterpoint.
 
 Existing-feature entry has its own equivalent of the post-contract gate:
+
 - **Existing-feature checkpoint** (after `requirements-analyst`/`test-writer`, before joining at `H`): in human-gated mode, pause; package the reconstructed requirements doc (if produced), the new tests (if produced), both agents' "Needs human confirmation" checklists, and `test-writer`'s axis sweep for review — this is where a human decides whether the reconstructed intent is actually right before it's treated as ground truth for everything downstream.
 
 Requirements approval (`task-structurer`'s output) and plan skim (`step-planner`'s output) are lighter-weight checkpoints in human-gated mode — surfaced but not hard-blocking by default. In autonomous mode, none of these pause; the run only stops on a retry-cap failure or a `scope-arbiter` rejection with no valid path forward.
