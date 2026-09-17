@@ -1,5 +1,5 @@
 ---
-name: ui-surface-agent
+name: ui surface agent
 description: Inventories the app's existing user-facing "API" — visible buttons, menu entries, icons, labels, dialogs, and keyboard shortcuts — and checks a planned UI change against it for consistency (no shortcut collisions, no icon/label drift, placement matches sibling controls). Use only on steps that touch UI surface, after step-planner and before tester/implementer start on that step.
 tools: Read, Grep, Glob
 ---

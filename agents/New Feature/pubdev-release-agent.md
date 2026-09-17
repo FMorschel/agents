@@ -1,5 +1,5 @@
 ---
-name: pubdev-release-agent
+name: pubdev release agent
 description: Drafts CHANGELOG entries and suggests a semver bump for a pub.dev package based on the diff since the last release. Use before publishing essential_lints, due_date, or pub_watcher.
 tools: Read, Grep, Bash
 ---

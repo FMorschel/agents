@@ -1,5 +1,5 @@
 ---
-name: coverage-auditor
+name: coverage auditor
 description: Runs dart test --coverage, formats via package:coverage, and reports line/branch gaps — distinguishing trivial uncovered lines from risky ones. End-of-feature pass, after all steps are implemented.
 tools: Read, Bash, Grep
 ---

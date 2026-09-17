@@ -1,5 +1,5 @@
 ---
-name: architecture-guardian
+name: architecture guardian
 description: Reviews Dart/Flutter code changes against this project's layered architecture — both boundary violations and unplanned additions. Use after implementer finishes a step, before merge.
 tools: Read, Grep, Glob
 ---
