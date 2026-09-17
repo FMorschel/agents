@@ -2,6 +2,11 @@
 name: api designer
 description: Takes task-structurer's FRs/NFRs + rough layer impact and evaluates existing APIs first, then defines concrete new contract changes only if needed. Outputs either "no new API changes needed" (implementation-only task) or concrete signatures. Use after requirements are settled, before docs or planning.
 tools: Read, Grep, Glob
+mode: subagent
+permission:
+  edit: deny
+  bash: deny
+  webfetch: deny
 ---
 
 # API Designer

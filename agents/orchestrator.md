@@ -2,6 +2,11 @@
 name: orchestrator
 description: Coordinates the full pipeline — knows the agent graph, assembles per-agent context, enforces retry/escalation policy, and switches between autonomous and human-gated modes. Not a domain specialist; produces no findings of its own.
 tools: Read, Grep, Glob, Bash, Agent
+mode: primary
+permission:
+  edit: allow
+  bash: allow
+  webfetch: deny
 ---
 
 # Orchestrator
