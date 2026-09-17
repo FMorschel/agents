@@ -1,5 +1,5 @@
 ---
-name: dart-modernization-agent
+name: dart modernization agent
 description: Checks whether existing/touched code could be simplified using Dart language features newer than this agent's own knowledge — fetches the SDK changelog first to establish what's actually new. End-of-feature pass, often paired with duplicate-code-detector's findings. Surfaces findings only — never edits code.
 tools: Read, Grep, Glob, WebFetch
 ---

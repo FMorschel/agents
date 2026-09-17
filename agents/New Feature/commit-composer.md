@@ -1,5 +1,5 @@
 ---
-name: commit-composer
+name: commit composer
 description: Reads the accumulated git changes for a completed feature and proposes how to split them into sensible commits for a human reviewer — including splitting a single file's changes across commits — with messages matching this project's commit convention. Runs at the end of the pipeline, after all gates pass.
 tools: Read, Bash, Grep, Glob
 ---

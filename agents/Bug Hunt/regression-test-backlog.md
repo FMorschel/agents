@@ -1,5 +1,5 @@
 ---
-name: regression-test-backlog
+name: regression test backlog
 description: Discovered bugs confirmed by bug-verifier, pending regression test creation by test-writer or implementer
 metadata:
   type: reference
