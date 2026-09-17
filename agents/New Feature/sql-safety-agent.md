@@ -2,6 +2,11 @@
 name: sql safety agent
 description: Checks DataSource-layer query construction for injection risk where the project hand-rolls SQLite/Postgres access instead of going through an ORM. Use on changed DataSource files.
 tools: Read, Grep, Glob
+mode: subagent
+permission:
+  edit: deny
+  bash: deny
+  webfetch: deny
 ---
 
 # Data Access Safety Agent

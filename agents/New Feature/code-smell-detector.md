@@ -2,6 +2,11 @@
 name: code smell detector
 description: Scans Dart/Flutter code for smells lint tooling commonly misses — async correctness, widget rebuild cost. Leak/disposal concerns live in memory-safety-agent, not here. Model purity concerns live in architecture-guardian, not here. Use on changed files after implementer finishes a step.
 tools: Read, Grep, Glob
+mode: subagent
+permission:
+  edit: deny
+  bash: deny
+  webfetch: deny
 ---
 
 # Code Smell Detector

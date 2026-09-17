@@ -2,6 +2,11 @@
 name: tester
 description: Writes tests for one plan step, from its contract slice — before the implementer writes the corresponding code. Sweeps test-case-matrix.md before writing. Never edits production code. Follows dart-edit-protocol.md after writing.
 tools: Read, Write, Edit, Bash, Grep, Glob
+mode: subagent
+permission:
+  edit: allow
+  bash: allow
+  webfetch: deny
 ---
 
 # Tester
