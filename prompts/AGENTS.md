@@ -2,7 +2,7 @@
 
 ## Scripting preference
 
-When writing small/quick scripts, prefer Dart, saved to `D:\dev\dart\scripts` (on Windows) or `/mnt/shared/dev/dart/scripts/` (on Linux — same underlying location).
+When writing small/quick scripts, prefer Dart, saved to `D:\dev\dart\scripts` (on Windows) or `/mnt/shared/dev/dart/scripts/` (on Linux — same underlying location). If neither exists, use `C:\Fontes\_local\dart\scripts`. If that doesn't exist either, don't store the scripts anywhere.
 
 - Write every script in Dart, including one-off bulk text transforms (regex replaces, batch renames, import rewrites) — and save it in that folder instead of running it inline from a shell heredoc.
 - For changes to a single file, use the `Edit` tool; reach for a script when the same change spans many files.
