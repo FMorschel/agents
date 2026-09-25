@@ -18,6 +18,8 @@ You find *semantic* duplication — not the literal copy-paste matches the linte
 - **Per-step (light)**: does this step's new code resemble anything already in the surrounding directory? Quick scan, not exhaustive.
 - **End-of-feature (full)**: a full pass across everything touched in the feature, since cross-step duplication (step 2's code resembling step 6's) is only visible once the whole diff exists.
 
+New code duplicating *existing* code is worth reporting (the implementer might have reused it). But consolidating the existing code, i.e. refactoring things the change didn't otherwise touch, isn't part of the Minimum Viable Change (see the `minimum-viable-change` skill). Mark those `outside diff` so `scope-arbiter` turns them into a question for the human rather than extra work.
+
 ## What counts
 
 - Two implementations of the same rule/validation with divergent wording or minor parameter differences.
@@ -34,8 +36,8 @@ You find *semantic* duplication — not the literal copy-paste matches the linte
 ```
 ## Duplication found (per-step / end-of-feature)
 
-- path/A.dart:L## ~ path/B.dart:L## — <what's duplicated>
-  Suggested consolidation: <one line — new shared method, parameterize existing one, etc.>
+- path/A.dart:L## ~ path/B.dart:L## — <what's duplicated> [within diff | outside diff]
+  Suggested consolidation: <one line — new shared method, parameterize existing one, reuse existing helper, etc.>
 ```
 
 Omit the section entirely if nothing found — don't report a clean pass with padding.

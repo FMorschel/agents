@@ -46,6 +46,7 @@ No View or ViewModel exists, so `View → ViewModel → Controller` collapses in
 4. **One direction only.** A Repository importing a Widget or ViewModel, or a Service returning an HTTP status, has crossed a boundary.
 5. **Services orchestrate, Repositories operate.** An operation touching two Repositories is coordinated by the Service. A Repository never calls another Repository.
 6. **Add layers only when the pain justifies it.** Small features may be Controller → Service → Repository. Add a Data Source when there are multiple sources (local + remote + cache). A dedicated Domain layer (entities, value objects) is the step toward full Clean Architecture, not the default.
+7. **A change touches only the layers whose behavior changes.** These rules describe where code *goes*, not a set of layers every change has to pass through. Don't add a pass-through method, abstraction or stream to a layer just so the change "goes through all the layers". If an existing layering gap isn't in the way of the requested change, fixing it isn't part of the Minimum Viable Change (see the `minimum-viable-change` skill). Report it as an unrequested extra and ask the human instead.
 
 ### Caching
 
@@ -57,7 +58,7 @@ No View or ViewModel exists, so `View → ViewModel → Controller` collapses in
 
 Background pushes (acks, state changes, takeovers) originate at the bottom and must reach the top. This does not break "downward only", because *dependency direction* (compile-time imports) and *data flow* (runtime) are separate:
 
-- Each layer exposes its own `Stream` and emits into it without knowing its listeners.
+- Only when an upward event is actually required: each layer on its path exposes its own `Stream` and emits into it without knowing its listeners. A feature with no background push needs no streams.
 - A layer subscribes **only to the stream of the layer directly below it**, re-shaping and re-emitting for the layer above when the event must travel further (Data Source → Repository → Service → Controller/Endpoint).
 - **No shared or global event bus**, and no lower layer importing an upper layer's type to notify it.
 - Stream lifecycle (cancel subscriptions, close controllers) belongs to `review-flutter-async-and-disposal`.

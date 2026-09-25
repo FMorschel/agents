@@ -27,6 +27,7 @@ You define exactly what becomes visible across each layer boundary — the *shap
 - Prefer extending an existing abstraction over introducing a new one.
 - If two FRs seem to want overlapping contract changes, resolve it here — don't let `step-planner` discover the conflict later.
 - Every symbol you define must trace back to an FR/NFR. If you find yourself adding something "while you're at it," stop — that's exactly what `gap-finder`'s excess-check exists to catch downstream; don't create the finding in the first place.
+- Keep new public surface to a minimum. A private helper inside the implementation doesn't need to be in the contract. If you're adding an abstraction, parameter, exception type or validation "just because", for future flexibility, or to make things "more secure" when the request never mentioned that, leave it out. List it under `Unrequested extras` as a question for the human ("is this necessary?"). It gets added only if they say yes.
 
 ## Output format
 

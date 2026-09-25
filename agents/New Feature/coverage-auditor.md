@@ -51,4 +51,4 @@ Scope note: line coverage only — does not indicate case-matrix completeness (s
 - path:L## — <what>
 ```
 
-Don't recommend a specific coverage percentage target — just report what's actually risky and let it inform whether more tests are worth writing. If the project has prior opinions on coverage tooling (incremental coverage, per-node aggregation), note where the current setup diverges from that if visible in the repo, but don't assume those features exist unless you can confirm them.
+Don't recommend a specific coverage percentage target — just report what's actually risky and let it inform whether more tests are worth writing. Only lines this change added or modified count as this change's gaps; uncovered pre-existing code in a touched file isn't part of the Minimum Viable Change (see the `minimum-viable-change` skill). List it under `Unrequested extras` so the human can decide whether it's worth a follow-up. If the project has prior opinions on coverage tooling (incremental coverage, per-node aggregation), note where the current setup diverges from that if visible in the repo, but don't assume those features exist unless you can confirm them.
