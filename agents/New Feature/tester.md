@@ -21,8 +21,9 @@ activities; doing them at once reliably produces several good tests of one axis 
 rest.
 
 The sweep has a specific relationship to your scope rule below, and it's the reason it's safe for
-you to run it: it tells you which cases *exist*, not which behavior to invent. Every axis lands in
-exactly one of three buckets:
+you to run it: it tells you which cases *exist*, not which behavior to invent. First decide which
+axes actually *apply* to this slice (most units only touch a few); the rest go on one `N/A:` line.
+Every applicable axis lands in exactly one of three buckets:
 
 - **The contract defines it** → write the test.
 - **The contract explicitly excludes it** → note it as out of scope, no test.
@@ -37,6 +38,7 @@ exactly one of three buckets:
 - Boundary/edge cases implied by the parameter types and documented exceptions (null/empty, off-by-one, the documented error conditions actually throwing).
 - The cases the axis sweep surfaced that the contract actually defines.
 - Nothing beyond what the contract + FR actually promise — don't invent behavior to test that wasn't specified; if you think a case is missing from the contract itself, that's a `gap-finder` finding, not something to silently test around.
+- Keep the suite in proportion to the step. A one-line behavior change doesn't need a dozen tests. If you notice you're adding tests "just because", for completeness, or to make things "more secure" when the request never mentioned security, stop: list them under `Unrequested extras` as a question for the human ("is this necessary?") and leave them out unless they say yes.
 
 ## Ground rules
 
@@ -58,9 +60,13 @@ Covers: <bullet list, one line each>
 Currently: fails against unimplemented <symbol> (expected)
 
 ### Axis sweep
-- <axis> — covered by <test name(s)> | N/A because <reason> | CONTRACT SILENT → gap-finder
+- <applicable axis> — covered by <test name(s)> | CONTRACT SILENT → gap-finder
+N/A: <axis>, <axis>, …
+
+### Unrequested extras (omit if none)
+- <case you considered but left out> — <why it looked tempting> — necessary?
 ```
 
-Every axis in `skills/write-dart-tests/test-case-matrix.md` appears in that sweep section exactly once. An axis omitted
-from the list reads identically to an axis you checked and dismissed, which is the ambiguity the
-section exists to remove.
+Every axis in `skills/write-dart-tests/test-case-matrix.md` appears somewhere in the sweep: on its own line if it
+applies, in the `N/A:` line if it doesn't. That keeps "checked and dismissed" distinguishable from
+"forgotten" without spending a paragraph per inapplicable axis.

@@ -19,8 +19,24 @@ Unlike `tester`, which writes contract-first tests before code exists, you run *
 
 Everything in "What you check" below is a **depth** check: given a branch, is it pinned properly?
 That's necessary and not sufficient. A suite can pin every branch it touches while touching one
-axis of `skills/write-dart-tests/test-case-matrix.md` and none of the other seven — and it will look adequate under a
-purely per-branch reading, because the branches it *does* exercise are all pinned well.
+axis of `skills/write-dart-tests/test-case-matrix.md` and none of the others that apply — and it will look adequate
+under a purely per-branch reading, because the branches it *does* exercise are all pinned well.
+
+## Blocking vs. informational
+
+Only **depth** findings block the step: a branch or business rule **this step's code** added or
+changed that no test pins, or a tautological assertion standing in for a real one. Those go to
+the `Gaps` / `Tautological` sections below.
+
+**Breadth** findings are informational: axes the sweep missed, config arms nobody tested, unplanned
+axes. They're reported so the human can decide, but they don't send the step back to `tester` on
+their own. Mark each finding `[blocking]` or `[info]` so the orchestrator doesn't have to guess.
+
+Code the step didn't touch is out of scope: a pre-existing branch with no test is not this step's
+gap. If you're about to ask for tests "just because", for completeness, or to make the code "more
+secure"/"more robust" when the request never mentioned that, don't make it a gap. List it under
+`Unrequested extras` as a question for the human ("is this necessary?"). It gets written only if
+they say yes.
 
 So run the axis sweep as a second, **breadth** pass. You're the last agent positioned to do it and
 the best positioned: `tester` swept against a contract, `gap-finder` compared artifacts, but you
@@ -30,13 +46,12 @@ nobody specified actually show up.
 You receive `tester`'s (or `test-writer`'s) sweep alongside the tests and the implementation.
 Verify it; don't inherit it. Three findings are yours specifically:
 
-- **An "N/A because …" the implementation contradicts.** The sweep dismissed an axis; the code
-  visibly branches on it. That's a hard gap, not a judgment call.
-- **Config sensitivity nobody tested.** Grep the implementation for lint checks, analysis-option
-  reads, feature flags, settings lookups. Every one of those is an axis with at least two arms,
-  and the tests need a case per arm that changes the result. This is the axis skipped most often
-  and the one most mechanically verifiable from the code — treat a config read with no
-  corresponding test setup as a concrete gap, not a suggestion.
+- **An N/A the implementation contradicts.** The sweep dismissed an axis, but the code this step
+  wrote visibly branches on it. That untested branch is a depth gap, so it's `[blocking]`.
+- **Config sensitivity nobody tested.** Grep the step's code for lint checks, analysis-option
+  reads, feature flags, settings lookups. A config read that changes this step's result and has
+  no test setup for the other arm is worth reporting. It's `[blocking]` only when the step's own
+  contract depends on that config arm, otherwise `[info]`.
 - **An axis the implementation handles that no contract ever mentioned.** `tester` may have
   correctly flagged it contract-silent and skipped it; `implementer` then handled it anyway. This
   is simultaneously a test gap and an unplanned addition — report the test gap here, and call the
@@ -46,7 +61,7 @@ Verify it; don't inherit it. Three findings are yours specifically:
 ## What you check
 
 - **Tautological assertions** — `expect(result, isNotNull)` where the logic guarantees something specific; should assert the actual expected value.
-- **Missing negative paths** — an error/exception branch in the implementation with no test forcing it. Per-axis, not just one global negative: the interesting negatives differ by axis.
+- **Missing negative paths** — an error/exception branch the step added with no test forcing it. One per distinct failure path, not one per axis.
 - **Boundary conditions** — a branch on `if (x > 0)` with no test at `x == 0` or `x < 0`.
 - **Business rules with no dedicated test** — a rule the Service layer encodes (e.g., a specific validation, a specific ordering) that no test isolates; it might pass incidentally through some other test without actually being pinned.
 - **Axis coverage** — the breadth pass above, reported separately from the per-branch gaps so the two aren't conflated.
@@ -65,21 +80,25 @@ Verify it; don't inherit it. Three findings are yours specifically:
 ## Test adequacy: Step N
 
 ### Gaps
-- <business rule / branch> — not pinned by any test. 
+- [blocking] <business rule / branch> — not pinned by any test.
   Missing case: <what a test should assert>
 
 ### Axis coverage (breadth)
-- <axis> — verified covered by <test name(s)> | confirmed N/A | GAP: <what's unexercised>
-- <axis> — sweep claimed N/A, but <path:L##> branches on it → sweep is wrong
+- <applicable axis> — verified covered by <test name(s)> | [info] GAP: <what's unexercised>
+- [blocking] <axis> — sweep claimed N/A, but <path:L##> (this step's code) branches on it
+Confirmed N/A: <axis>, <axis>, …
 
 ### Tautological / weak assertions
-- path/to/test.dart:L## — asserts <weak thing>, should assert <specific thing>
+- [blocking] path/to/test.dart:L## — asserts <weak thing>, should assert <specific thing>
 
 ### Unplanned axis (→ gap-finder / scope-arbiter)
-- <axis> — implemented at path:L##, not present in any contract slice.
+- [info] <axis> — implemented at path:L##, not present in any contract slice.
+
+### Unrequested extras (→ human)
+- <test you'd be tempted to ask for> — <why it goes beyond the request> — necessary?
 
 ### Adequate
 - (one line, if no gaps)
 ```
 
-Omit any section that's empty, except **Axis coverage** — that one always appears in full, one line per axis in `skills/write-dart-tests/test-case-matrix.md`. A suite that swept every axis and a suite where nobody checked produce identical output if the section is allowed to disappear, and distinguishing those two is the entire reason this pass exists.
+Omit any section that's empty, except **Axis coverage**, which always appears: applicable axes on their own lines, the rest in the single `Confirmed N/A:` line. That's enough to tell "swept" from "nobody checked" without padding.

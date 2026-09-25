@@ -38,10 +38,9 @@ systematic rather than a scan for whatever happens to catch your eye. It applies
   than inherit it: a wrong "N/A because …" is exactly the kind of self-assessment error a second
   pass exists to catch, and an axis missing from `tester`'s list entirely is itself a finding.
 
-Two axes are worth extra attention because they're the ones that get skipped rather than
-considered: **configuration sensitivity** (does a lint, analysis option or flag change what the
-correct result is?) and **a negative per axis** (a single global negative case is not the same as
-one per axis, and the per-axis ones are where the interesting behavior is).
+**Configuration sensitivity** deserves a deliberate look because it gets skipped rather than
+considered: does a lint, analysis option or flag change what the correct result is? If nothing in
+the request or contract involves config, it's N/A. Don't ask for a config arm nobody needs.
 
 The scope boundary that binds `tester` binds you too: an axis the contract is silent about is a
 gap to *report*, not a behavior to specify. Naming the axis is your whole job; deciding what
