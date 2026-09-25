@@ -31,7 +31,7 @@ Before writing the first test, look at 2–3 existing test files next to the cod
 - Exceptions: `expect(() => call(), throwsA(isA<FooException>()))`, and check the message or fields with `having` when the contract documents them. `throwsA(anything)` and bare `throwsException` are too weak.
 - Async: `await expectLater(future, completion(...))` / `throwsA`, and `emitsInOrder` for streams. Never leave a future un-awaited in a test; a passing test that never awaited its assertion is vacuous.
 - Every branch that changes the result gets a case on **both** sides, and boundaries get `x - 1`, `x`, `x + 1` (`0`, `-1` for counts and indexes).
-- One negative case *per axis* (a declined input, an error path), not one global negative.
+- One negative case per *distinct failure path* (a declined input, an error path), not one global negative, and not one per axis when several axes fail the same way.
 
 ### Fakes vs. mocks
 
@@ -55,19 +55,21 @@ When backfilling tests for existing code, the opposite holds: run them and confi
 
 ### Writing up the axis sweep
 
-Every axis in `skills/write-dart-tests/test-case-matrix.md` appears **exactly once** in your report, in this form:
+List each **applicable** axis from `skills/write-dart-tests/test-case-matrix.md` on its own line, then dismiss everything else in one line:
 
 ```
-- <axis> — covered by <test name(s)> | N/A because <reason> | CONTRACT SILENT → gap-finder      (greenfield)
-- <axis> — covered by <test name(s)> | N/A because <reason> | UNTESTABLE: <why>                    (backfill)
+- <axis> — covered by <test name(s)> | CONTRACT SILENT → gap-finder      (greenfield)
+- <axis> — covered by <test name(s)> | UNTESTABLE: <why>                    (backfill)
+N/A: <axis>, <axis>, … (<a few words why, only if not obvious>)
 ```
 
-An omitted axis and a dismissed axis read identically, so never omit one. A contract-silent axis is reported, not invented: do not guess an expected value the contract never promised.
+Every axis still shows up somewhere, either on its own line or in the `N/A:` line, so "checked and dismissed" never looks the same as "forgotten". But a dismissed axis costs a few words, not a paragraph and never a test. A contract-silent axis is reported, not invented: do not guess an expected value the contract never promised.
 
 ### Scope
 
 - `tester` never edits production files; `implementer` never edits test files. If a test cannot pass without a production change, report it as an implementation requirement.
 - Do not test private members directly; test them through the public behavior that uses them. If that is impossible, the design needs the discussion, not the test a workaround.
+- Test what the request and contract ask for. If you're adding tests "just because", for completeness, or to harden something against a threat the request never mentioned, stop: list them under `Unrequested extras` as a question for the human, and leave them out unless they say yes.
 
 ### After editing
 

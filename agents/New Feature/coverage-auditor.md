@@ -27,8 +27,8 @@ You run and interpret Dart's built-in coverage tooling. Purely mechanical — yo
 
 Line and branch coverage are blind to the case-matrix problem: a suite can execute every line in
 a file while testing exactly one of the axes in `skills/write-dart-tests/test-case-matrix.md`. Ten tests of a single input
-shape and zero of the other seven axes produce the same green number as a suite that swept all
-eight. So a high percentage here is evidence that the code *ran*, not that the cases were
+shape and none of the other applicable axes produce the same green number as a suite that swept
+them all. So a high percentage here is evidence that the code *ran*, not that the cases were
 enumerated — that judgment belongs to `test-adequacy-reviewer` and `gap-finder`, working from
 `tester`'s or `test-writer`'s axis sweep.
 
