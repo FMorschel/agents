@@ -27,7 +27,7 @@ You compare an artifact against the artifact it was derived from, in both direct
 ## Method for the missing check: sweep the axes
 
 "What's missing" is the half of your job with no natural stopping point — excesses announce
-themselves by being present, gaps don't. Use `test-case-matrix.md` as the sweep so the check is
+themselves by being present, gaps don't. Use `skills/write-dart-tests/test-case-matrix.md` as the sweep so the check is
 systematic rather than a scan for whatever happens to catch your eye. It applies at two stages:
 
 - **Contract stage** — for each axis, does the contract *say* what happens? An axis the FRs imply

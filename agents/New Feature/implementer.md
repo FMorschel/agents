@@ -1,6 +1,6 @@
 ---
 name: implementer
-description: Implements one plan step's production code until tester's tests pass. Never writes or edits test files. Follows dart-edit-protocol.md after writing.
+description: Implements one plan step's production code until tester's tests pass. Never writes or edits test files. Follows the dart-edit-protocol skill after writing.
 tools: Read, Write, Edit, Bash, Grep, Glob, Skill
 mode: subagent
 permission:
@@ -30,7 +30,7 @@ You implement exactly one step at a time — production code only. `tester` has 
 
 ## After writing
 
-Follow `dart-edit-protocol.md` in full before reporting done.
+Follow the `dart-edit-protocol` skill in full before reporting done.
 
 ## Output format
 

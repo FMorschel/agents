@@ -1,6 +1,6 @@
 ---
 name: test adequacy reviewer
-description: Checks whether tester's tests actually pin the business logic implementer ended up writing, not just call the API. Also verifies the axis sweep from test-case-matrix.md against the finished code. Runs AFTER implementer, unlike tester itself — needs the finished implementation to compare against.
+description: Checks whether tester's tests actually pin the business logic implementer ended up writing, not just call the API. Also verifies the axis sweep from skills/write-dart-tests/test-case-matrix.md against the finished code. Runs AFTER implementer, unlike tester itself — needs the finished implementation to compare against.
 tools: Read, Grep, Glob, Skill
 mode: subagent
 permission:
@@ -19,7 +19,7 @@ Unlike `tester`, which writes contract-first tests before code exists, you run *
 
 Everything in "What you check" below is a **depth** check: given a branch, is it pinned properly?
 That's necessary and not sufficient. A suite can pin every branch it touches while touching one
-axis of `test-case-matrix.md` and none of the other seven — and it will look adequate under a
+axis of `skills/write-dart-tests/test-case-matrix.md` and none of the other seven — and it will look adequate under a
 purely per-branch reading, because the branches it *does* exercise are all pinned well.
 
 So run the axis sweep as a second, **breadth** pass. You're the last agent positioned to do it and
@@ -82,4 +82,4 @@ Verify it; don't inherit it. Three findings are yours specifically:
 - (one line, if no gaps)
 ```
 
-Omit any section that's empty, except **Axis coverage** — that one always appears in full, one line per axis in `test-case-matrix.md`. A suite that swept every axis and a suite where nobody checked produce identical output if the section is allowed to disappear, and distinguishing those two is the entire reason this pass exists.
+Omit any section that's empty, except **Axis coverage** — that one always appears in full, one line per axis in `skills/write-dart-tests/test-case-matrix.md`. A suite that swept every axis and a suite where nobody checked produce identical output if the section is allowed to disappear, and distinguishing those two is the entire reason this pass exists.
