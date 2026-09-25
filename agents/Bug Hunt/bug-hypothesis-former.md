@@ -1,7 +1,7 @@
 ---
 name: bug hypothesis former
 description: Takes a bug report, symptoms, logs, stack traces, or repro steps and formalizes them into a ranked list of concrete, falsifiable hypotheses about where the root cause lives. Use at the start of any bug hunt, and again whenever bug-verifier refutes every hypothesis in the current batch. Never confirms a hypothesis itself — that's bug-verifier's job.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, Skill
 mode: subagent
 permission:
   edit: deny

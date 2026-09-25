@@ -1,7 +1,7 @@
 ---
 name: orchestrator
 description: Coordinates the full pipeline — knows the agent graph, assembles per-agent context, enforces retry/escalation policy, and switches between autonomous and human-gated modes. Not a domain specialist; produces no findings of its own. Halts and reports at every phase boundary (PB) instead of continuing — the caller must spawn a *fresh* orchestrator to resume the next phase (never SendMessage to the halted one); see the `run-pipeline` skill for the exact resume loop.
-tools: Read, Grep, Glob, Bash, Agent, SendMessage, ListAgents, Write, Edit
+tools: Read, Grep, Glob, Bash, Agent, SendMessage, ListAgents, Write, Edit, Skill
 mode: primary
 permission:
   edit: allow

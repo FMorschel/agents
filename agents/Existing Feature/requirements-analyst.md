@@ -1,7 +1,7 @@
 ---
 name: requirements analyst
 description: "Use this agent to reverse-engineer the functional and non-functional requirements of a piece of software you already have implemented and tested (or partially tested) but never wrote down requirements for. It reads the implementation and its tests together and produces a requirements document — what the system is supposed to do, and under what constraints (performance, reliability, security, compatibility, etc.) — inferred from the two sources jointly. Like test-writer, it does not treat its output as settled fact: it always ends with an explicit list of requirements it inferred with low confidence, or where implementation and tests actively disagree, for a human to confirm. Examples: \"we built the sync engine and have some tests but no spec, write up its requirements\", \"figure out what this module is actually supposed to guarantee before I touch it\", \"reconcile what the tests claim versus what the code does for OrderProcessor\"."
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, Skill
 mode: subagent
 permission:
   edit: deny
