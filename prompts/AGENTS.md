@@ -21,6 +21,10 @@ When writing small/quick scripts, prefer Dart, saved to `D:\dev\dart\scripts` (o
 
 - Whenever fixing a bug, add a regression test for it (unless the user explicitly says not to). It should fail on the old code and pass with the fix.
 
+## Diagrams
+
+- **Always prefer Mermaid over plain-text (ASCII/box-drawing) code blocks** when drawing diagrams (architecture layers, flows, sequences, state machines, dependency graphs). Use a ```` ```mermaid ```` block instead of a ```` ```text ```` block. Fall back to text only for things Mermaid can't express (e.g. directory trees, literal terminal output).
+
 ## Tool preference
 
 - **Always prefer MCP tools over equivalent CLI commands.** If an MCP server exposes a tool that does the same thing as a shell command (e.g. the Dart MCP server's analyze/fix/format/test/pub tools vs. running `dart analyze`(or `puro dart analyze`)/`dart fix`(or `puro dart fix`)/`dart format`(or `puro dart format`)/`dart test -r failures-only`/`dart pub` in Bash), use the MCP tool. Only fall back to the CLI when no MCP equivalent exists or the MCP tool fails.
