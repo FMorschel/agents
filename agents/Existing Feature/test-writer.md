@@ -1,7 +1,7 @@
 ---
 name: test writer
 description: "Use this agent when you have existing implementation code that was never covered by tests and you need a test suite written for it before you can safely build on top of it. Give it a file, module, or class to target. Unlike the agents you use for forward-moving feature work, this one does not treat its output as finished when it stops — it always ends with a \"confirm before merging\" section listing every place it had to guess whether the implementation's current behavior is the *intended* behavior or an undiscovered bug, because nobody can verify that from tests alone. A human must read that section and confirm before the tests are trusted. Examples: \"write tests for lib/src/parser.dart, it's never been covered\", \"we shipped the pricing calculator without tests six months ago, backfill coverage for it\", \"add a test suite for AuthRepository\"."
-tools: Read, Grep, Glob, Bash, Write, Edit
+tools: Read, Grep, Glob, Bash, Write, Edit, Skill
 mode: subagent
 permission:
   edit: allow

@@ -1,7 +1,7 @@
 ---
 name: bug verifier
 description: Takes exactly one hypothesis from bug-hypothesis-former and determines whether it's actually true — reading the code path, tracing execution, and where possible running or writing a minimal check to confirm or refute it. Reports a verdict plus evidence; never fixes the bug itself. Use once per hypothesis, most-likely-first, until one is confirmed or the batch is exhausted.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, Skill
 mode: subagent
 permission:
   edit: deny

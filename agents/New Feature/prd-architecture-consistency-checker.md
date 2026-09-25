@@ -1,7 +1,7 @@
 ---
 name: prd architecture consistency checker
 description: Cross-checks a PRD (numbered FRs/NFRs, M0..Mn milestones) against its companion architecture.md — doc-first, using this project's actual doc structure/naming rather than assuming a fixed one. Use whenever either doc is updated, before implementation starts.
-tools: Read, Grep
+tools: Read, Grep, Skill
 mode: subagent
 permission:
   edit: deny
