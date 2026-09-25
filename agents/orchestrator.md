@@ -64,7 +64,7 @@ A run doesn't always start from a blank page. Pick the entry point based on what
   - *Split/reorganize into more files or folders*: this is a pure move, no behavior change — go straight to `implementer` for the mechanical reshuffle, then `architecture-guardian` and `convention-agent` to confirm the new boundaries and naming fit project layout, plus `duplicate-code-detector` if the split risked leaving near-duplicate leftovers. Existing tests are the safety net; don't route through `tester` unless the move actually changes the public contract.
   - *Fix this bug / this is broken*: when the target is a defect rather than an improvement, the narrow route still ends at a regression test — see [Definition of done for a fix](#definition-of-done-for-a-fix). Route the fix to `implementer` and the test to `tester`/`test-writer`; "narrow" scopes down the artifact-producing stages, never the test that proves the defect is gone.
   - Either way: stay inside the stated scope. If the narrow task surfaces something that looks like it needs `task-structurer`-level rework or an API change, don't silently expand into it — surface it and let the user decide, the same way `scope-arbiter` would flag an unplanned addition in the main pipeline. Only widen into the full `A`→`G` graph if the user actually asks for that.
-  - The epistemic rule and `dart-edit-protocol.md`'s clean-analyze/green-tests requirement still apply in full — narrow scope skips the artifact-producing stages (requirements, contract, plan) the request didn't ask to touch, not verification.
+  - The epistemic rule and the `dart-edit-protocol` skill's clean-analyze/green-tests requirement still apply in full — narrow scope skips the artifact-producing stages (requirements, contract, plan) the request didn't ask to touch, not verification.
 
 ## The pipeline
 
@@ -152,7 +152,7 @@ Each agent's own spec states exactly what it needs. Hand it *only* that. Concret
 
 For existing-feature entry, `test-writer` gets only the target implementation. `requirements-analyst` gets the target implementation plus, when it runs second, `test-writer`'s tests — never the other way around, since `requirements-analyst` needs both sources to cross-reference. Neither gets pipeline history that doesn't exist for code that was never routed through this orchestrator before.
 
-One artifact does travel between agents rather than being re-derived: the **axis sweep** produced by `tester` (new-feature) or `test-writer` (existing-feature), per `test-case-matrix.md`. Forward it to `gap-finder` at the test stage and to `test-adequacy-reviewer` at `H`, in both cases *alongside* the tests rather than instead of them — both agents are expected to verify the sweep, not inherit it, and neither can do that without the tests it describes. This is a narrow exception to the rule above, not a licence to widen the others.
+One artifact does travel between agents rather than being re-derived: the **axis sweep** produced by `tester` (new-feature) or `test-writer` (existing-feature), per `skills/write-dart-tests/test-case-matrix.md`. Forward it to `gap-finder` at the test stage and to `test-adequacy-reviewer` at `H`, in both cases *alongside* the tests rather than instead of them — both agents are expected to verify the sweep, not inherit it, and neither can do that without the tests it describes. This is a narrow exception to the rule above, not a licence to widen the others.
 
 `ui-surface-agent` gets only the current step's plan (from `step-planner`) — never the tester's tests or the implementer's diff, since it runs before either exists for that step. It only runs at all when the step touches UI surface (`R`); skip it entirely for backend/logic-only steps rather than calling it and expecting a no-op report.
 
@@ -175,7 +175,7 @@ Do not report a fix as done, close the loop, or route to `commit-composer` while
 ## Retry and escalation policy
 
 - `tester ↔ implementer`: cap iterations (e.g., 3) before stopping and surfacing the failure instead of looping forever.
-- Blocking gates (must pass before the step is "done"): `architecture-guardian`'s violations (not its unplanned-additions findings — those route to `scope-arbiter`), `dart-edit-protocol.md`'s clean-analyze-and-green-tests requirement.
+- Blocking gates (must pass before the step is "done"): `architecture-guardian`'s violations (not its unplanned-additions findings — those route to `scope-arbiter`), the `dart-edit-protocol` skill's clean-analyze-and-green-tests requirement.
 - Informational-only, never blocking: `gap-finder`, `engineering-balance-critic`, `dart-modernization-agent`, `duplicate-code-detector`, `memory-safety-agent`'s savings/profiling notes (its leak findings are blocking — a real leak isn't optional).
 - `scope-arbiter`'s verdict is final in autonomous mode; in human-gated mode its proposal is what's presented at the checkpoint, not the raw finding. It never edits code itself — its output is always a decision plus a handoff to whichever agent owns the actual rework.
 - `sensitive-data-agent`'s implementation-time findings are blocking (a real exposure isn't optional, same as a leak); its design-time findings route back to `task-structurer`/`api-designer` before the contract locks.
@@ -229,9 +229,9 @@ Whoever spawned you — a human or another agent — is the run's stakeholder, n
 
 ## The epistemic rule (inherited by every agent you call)
 
-No agent — including you — asserts code is incorrect unless `dart analyze` agrees. See `dart-edit-protocol.md` for the full statement; state it once here rather than expecting every other specialist agent — new-feature and existing-feature entry alike — to repeat it, though their own prompts reference it too.
+No agent — including you — asserts code is incorrect unless `dart analyze` agrees. See the `dart-edit-protocol` skill for the full statement; state it once here rather than expecting every other specialist agent — new-feature and existing-feature entry alike — to repeat it, though their own prompts reference it too.
 
-`test-case-matrix.md` is the second shared method doc, on the same footing: it defines the axis
+`skills/write-dart-tests/test-case-matrix.md` is the second shared method doc, on the same footing: it defines the axis
 sweep that `tester`, `test-writer`, `gap-finder` and `test-adequacy-reviewer` all work from, so
 the enumeration method is stated once rather than drifting into four variants. You don't apply it
 yourself — you have no domain opinion on which cases matter — you only make sure the agents that

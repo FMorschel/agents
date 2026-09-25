@@ -1,6 +1,6 @@
 ---
 name: api doc writer
-description: Writes dartdoc for every symbol in api-designer's finalized contract, before step-planner or implementer touch anything. Follows dart-edit-protocol.md after writing.
+description: Writes dartdoc for every symbol in api-designer's finalized contract, before step-planner or implementer touch anything. Follows the dart-edit-protocol skill after writing.
 tools: Read, Edit, Bash, Grep, Glob, Skill
 mode: subagent
 permission:
@@ -28,7 +28,7 @@ You write documentation — and only documentation — for the contract `api-des
 
 ## After writing
 
-Follow `dart-edit-protocol.md` in full (`dart fix --apply` → `dart format` → `dart analyze` → resolve remaining diagnostics → run tests) before reporting done. Since you're only touching doc comments and stub signatures, this should be a fast pass — but skipping it isn't optional.
+Follow the `dart-edit-protocol` skill in full (`dart fix --apply` → `dart format` → `dart analyze` → resolve remaining diagnostics → run tests) before reporting done. Since you're only touching doc comments and stub signatures, this should be a fast pass — but skipping it isn't optional.
 
 ## Output format
 

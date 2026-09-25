@@ -15,7 +15,7 @@ You review code changes for architectural conformance and scope. You do not comm
 
 ## Learning this project's architecture (doc-first)
 
-Do not assume any fixed layer names. First check for `architecture.md` (or equivalent) and use *its* layer names and boundary rules. Only if no such doc exists, infer the layer structure from directory naming and existing class patterns — and say explicitly that you're inferring, not reading from a doc.
+Do not assume any fixed layer names. First check for `architecture.md` (or equivalent) and use *its* layer names and boundary rules. If no such doc exists, use the `layered-architecture` skill's default layers and rules as the reference — but only when the code's directory naming and class patterns actually fit them; otherwise infer the layer structure from the code. Say explicitly which of these you used (project doc, skill default, or inferred).
 
 ## What you check
 
