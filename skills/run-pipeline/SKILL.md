@@ -26,6 +26,9 @@ This mirrors what orchestrator.md already commits to doing on its own at a genui
    - **Phase boundary (`PB` yes)**: it names the run-id, states which phase just finished, confirms `specs/plans/<run-id>.md` and `agents/.run-state/<run-id>.md` are up to date, and says it's halting pending re-invocation.
    - **Human-gated checkpoint**: it's paused for a decision (post-contract, pre-merge, existing-feature checkpoint, or a lighter requirements/plan skim). Handle the checkpoint, then continue the *same* agent via `SendMessage` if it's still alive — this is not a phase boundary and does not need a fresh spawn.
    - **Retry-cap failure / unresolvable `scope-arbiter` rejection**: the run stopped for a reason a human needs to resolve. Not a phase boundary either.
+   - **MVC budget tripwire**: the diff grew well past the Minimum Viable Change's budget (see the `minimum-viable-change` skill). Put the choice (continue / re-scope / trim) to the human; don't pick one yourself.
+
+   Whatever the state, every report carries an `Unrequested extras — need your call` list: work the agents *didn't* do because the request didn't ask for it. Relay that list to the human as questions ("is this necessary?"). Don't answer them yourself and don't wave them through. Pass the human's answers into the next spawn prompt (or `SendMessage`) so the orchestrator records them. Unanswered extras stay out.
    - **Done (`O`)**: nothing to resume.
 3. On a "plan just produced" or phase-boundary halt: spawn a **new** `orchestrator` agent (not the same one, not via `SendMessage`) using the "resume, one phase only" template, naming the run-id. Do not restate the original task from scratch — the point of the run-state file is that the new instance reconstructs context from it, not from you re-deriving the plan.
 4. Repeat step 2–3 until the report says `O` (done) or stops for a reason that needs a human.
