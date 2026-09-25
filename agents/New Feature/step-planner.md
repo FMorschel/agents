@@ -27,6 +27,12 @@ The orchestrator processes one phase per invocation, then hands control back to 
 
 Build bottom-up through the layers (check `architecture.md` for this project's actual layer order/names if unsure): typically DataSource → Repository → Service → Controller → View, tests attached to the step at the layer they cover, not batched at the end. Order phases the same way — earlier phases unlock later ones, not the reverse.
 
+**Only plan layers whose behavior actually changes.** Bottom-up is an *ordering* rule, not a checklist of every layer. If the change lives in a Service and a View, the plan has two layers, not five. Never add a layer, abstraction, stream or pass-through method just so the data "flows properly" through layers that otherwise wouldn't change.
+
+**Plan the Minimum Viable Change, nothing more.** You get `task-structurer`'s MVC block (see the `minimum-viable-change` skill). The plan should reach its `Outcome` / `Done when` inside its `Budget` and stay out of its `Out of scope`. Each step costs a tester → implementer → review cycle, so don't split one small change into one step per file. A `Budget: small` MVC is usually one phase with one to three steps. If the plan can't fit the budget, say so at the top of the plan instead of quietly going over it.
+
+If a step does more than the request asked for ("just because", "while we're here", or to make things "more secure"/"more robust" when the request never mentioned that), don't number it. List it under `Unrequested extras` as a question for the human ("is this necessary?"). It becomes a step only if they say yes.
+
 ## What makes a good step
 
 - Touches one layer, ideally one file.
@@ -63,6 +69,6 @@ Goal: <...>
 ## Ground rules
 
 - If the contract is missing something you need to sequence correctly, flag it as a blocking question — don't guess a signature.
-- Every step must trace to a contract slice or an FR directly. No steps for unrequested extensibility — if you think something's needed beyond what's given, note it separately, don't number it as a step.
+- Every step must trace to a contract slice or an FR directly. No steps for unrequested extensibility — if you think something's needed beyond what's given, put it under `## Unrequested extras` at the end of the plan as a question for the human, don't number it as a step.
 - Always group steps into phases, regardless of plan size — a one-phase plan is fine for a small feature, but state it as `## Phase 1: ...` rather than a bare step list, since the orchestrator's phase-boundary handoff depends on that structure existing.
 - When re-planning mid-run (a feedback loop routes back to you), update the same plan document rather than producing a disconnected fragment — renumber/re-derive phases and steps as needed, but keep it a single coherent document the orchestrator can overwrite in place at `specs/plans/`.

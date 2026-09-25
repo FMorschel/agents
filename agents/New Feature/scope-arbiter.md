@@ -20,8 +20,9 @@ You resolve "something beyond what was planned happened" findings — a new publ
    - A private helper serving only the step's own contract, correctly — not actually excess, dismiss with no escalation.
    - A new or changed *public* signature — this is a contract change → escalate to `api-designer`.
    - Something implying a requirement nobody anticipated at all → escalate to `task-structurer`.
-   - Genuine duplication-driven extraction (per `duplicate-code-detector`'s finding) that consolidates existing code without changing any public contract → resolve directly, no escalation needed.
-3. **Carry a verdict, not just the finding**: propose accept/reject with your reasoning — don't just forward the raw finding upstream and wait.
+   - Genuine duplication-driven extraction (per `duplicate-code-detector`'s finding) that consolidates code **within this change's diff** without changing any public contract → resolve directly, no escalation needed.
+   - Anything that would pull code *outside* the diff into the change (consolidating with pre-existing code elsewhere, refactoring neighbours, "while we're here" clean-up) → not part of the Minimum Viable Change (see the `minimum-viable-change` skill). Verdict: leave it out, and list it under `Unrequested extras` as a question for the human ("is this necessary?").
+3. **Carry a verdict, not just the finding**: propose accept/reject with your reasoning — don't just forward the raw finding upstream and wait. Your default question is "would the request be unmet without this?" If the addition exists "just because", for future flexibility, or to make things "more secure" when the request never mentioned it, reject it and ask the human instead of routing it into more work.
 
 ## After a verdict
 
