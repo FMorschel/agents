@@ -39,6 +39,7 @@ The Dart MCP server's analysis, fix, format and pub tools act on registered root
 ```
 
 - Read **every** diagnostic, including warnings and infos. "No errors" is not the bar; resolve the underlying issue unless the user has opted out of that lint. Do not silence with `// ignore:` to get to green unless the ignore is genuinely correct and you say why.
+- **Async rule, checked by hand when no lint covers it:** functions returning a `Future` are `async` and their futures are `await`ed (including `return await foo();`, for a complete error stack and so errors reach an enclosing `try`/`catch`; also `=> await foo()` in `async` arrow bodies, which `async_return_with_no_await` doesn't cover), unless explicitly `unawaited(...)` or carrying an `// ignore:` for the specific diagnostic (`unawaited_futures`, `discarded_futures`). The narrow exception is returning a `Future.value(...)` / `Future.syncValue(...)` call directly (not `Future.sync`). Never remove a `return await` just to satisfy the deprecated `unnecessary_await_in_return`; flag the conflict instead. If the project doesn't enable those lints, scan your own edits for violations before step 3. Details in `review-flutter-async-and-disposal` (section A).
 - Step 5 runs the full suite, not just your file. Prefer failures-only output (`dart test -r failures-only`) to keep it readable and you should mostly not need tail.
 - Restart the loop from step 1 after *any* edit made to resolve a diagnostic or a failure; each edit can create new ones.
 

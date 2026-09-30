@@ -29,7 +29,7 @@ Before writing the first test, look at 2–3 existing test files next to the cod
 - Assert the **specific expected value**, never mere presence: `expect(page.items, [10, 11, 12])`, not `expect(page.items, isNotEmpty)`; `expect(result, isNotNull)` is only right when non-null is the whole contract.
 - Prefer one behavior per test. Several `expect`s are fine when they describe the same behavior (an object's fields after one operation); several unrelated behaviors are several tests.
 - Exceptions: `expect(() => call(), throwsA(isA<FooException>()))`, and check the message or fields with `having` when the contract documents them. `throwsA(anything)` and bare `throwsException` are too weak.
-- Async: `await expectLater(future, completion(...))` / `throwsA`, and `emitsInOrder` for streams. Never leave a future un-awaited in a test; a passing test that never awaited its assertion is vacuous.
+- Async: `await expectLater(future, completion(...))` / `throwsA`, and `emitsInOrder` for streams. Never leave a future un-awaited in a test; a passing test that never awaited its assertion is vacuous. The general `async`/`await` rule (`async` on anything returning a `Future`, `await` every future unless `unawaited(...)` or a diagnostic-specific `// ignore:`) in `review-flutter-async-and-disposal` applies to tests and helpers too.
 - Every branch that changes the result gets a case on **both** sides, and boundaries get `x - 1`, `x`, `x + 1` (`0`, `-1` for counts and indexes).
 - One negative case per *distinct failure path* (a declined input, an error path), not one global negative, and not one per axis when several axes fail the same way.
 
