@@ -5,7 +5,7 @@ description: "Use whenever you add, move, or edit members of a Dart class (const
 
 ## Editing a Dart class
 
-This skill covers *where* members go (ordering, blank lines, parameter order). For *what form* a class and its data should take — primary constructors, field vs. `late` field vs. getter, mutability, equality, class kind, naming — use the `design-dart-class` skill alongside it.
+This skill covers *where* members go (ordering, blank lines, parameter order). For *what form* a class and its data should take — primary constructors, field vs. `late` field vs. getter, mutability, equality, class kind, naming — use the `design-dart-class` skill alongside it. For a `State<StatefulWidget>` subclass specifically, the `flutter-conventions` skill (its `state.md`) overrides the tiebreak below for `initState`/`didChangeDependencies`/`didUpdateWidget`/`dispose`/`build` (and RouteAware callbacks) with a fixed lifecycle order, and adds a pattern for caching `.of(context)` lookups — check it before applying the generic alphabetical/priority tiebreak to those members.
 
 Every edit to a class body must leave the class in the layout below — not just the lines you touched. When you add a member, insert it at its correct position. When you edit a class that is already out of order, reorder the members you are touching and mention the rest rather than silently reshuffling the whole file.
 
