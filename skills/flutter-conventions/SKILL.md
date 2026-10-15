@@ -1,6 +1,6 @@
 ---
 name: flutter-conventions
-description: "Use whenever you write, edit or review Flutter widget code: `State` classes (caching `.of(context)` lookups in didChangeDependencies, fixed lifecycle override order), widget composition (widget classes, not helper methods), rebuild scoping (narrow selectors, read vs. watch), theming, navigation, async UI states, and controller ownership/disposal. Index skill: load only the topic files that match the task."
+description: "Use whenever you write, edit or review Flutter widget code: `State` classes (caching `.of(context)` lookups in didChangeDependencies, fixed lifecycle override order), widget composition (widget classes, not helper methods), rebuild scoping (narrow selectors, read vs. watch), theming, navigation, async UI states, controller ownership/disposal, and platform checks (avoid `Platform.isFoo`; guard with `!kIsWeb` when unavoidable). Index skill: load only the topic files that match the task."
 ---
 
 ## Flutter conventions
@@ -18,5 +18,6 @@ Read only the files that match what you are touching:
 | Navigator/router calls, passing results back | [navigation.md](navigation.md) |
 | FutureBuilder/StreamBuilder, loading/error/empty states | [async-ui.md](async-ui.md) |
 | TextEditingController, FocusNode, AnimationController, etc. | [controllers.md](controllers.md) |
+| `Platform.isFoo`, `kIsWeb`, `defaultTargetPlatform`, per-platform branching | [platform.md](platform.md) |
 
 After editing Dart files, follow the post-edit Dart workflow from the global instructions: `dart fix --apply`, `dart analyze` (fix every diagnostic), then `dart format` on each edited file.
