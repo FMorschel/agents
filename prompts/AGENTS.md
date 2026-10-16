@@ -44,6 +44,10 @@ When writing small/quick scripts, prefer Dart, saved to `D:\dev\dart\scripts` (o
 
 - **Before the first Dart MCP tool call in a session, set the project roots.** The Dart MCP server's analysis, fix, and pub tools operate against registered roots — without them, the tools have nothing to act on. Use the server's roots-management tool (e.g. `set_roots` / `add_roots`) to register the current workspace root before calling any other Dart MCP tool.
 
+## Building Dart executables for other platforms
+
+- **Dart can cross-compile native executables from Windows to Linux.** To build a Dart CLI for WSL/Ubuntu, run `dart compile exe --target-os=linux --target-arch=x64 bin/app.dart -o <out>` on the Windows host (`arm64` etc. also work), then copy the binary into WSL. Don't download a Linux Dart SDK for this. Pass any `--define=` values the project's own build script would.
+
 ## Debugging Dart/Flutter apps
 
 - **Prefer connecting to the already-running app via the Dart Tooling Daemon (DTD) over starting a new debug session.** Ask the user for a DTD URI (e.g. `dart mcp-server` / editor's DTD URI, usually printed when the app is launched with `--print-dtd` or shown in the IDE's Dart/Flutter debug session) and connect the Dart MCP server to it. Only if the user doesn't have one available should you fall back to launching/debugging the app yourself — e.g. running it as Flutter web, or whatever other approach fits the situation — instead of asking them to find one.
