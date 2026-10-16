@@ -1,0 +1,293 @@
+# Review Rubric: 13 Angles & The Inquisitor Doctrine
+
+The model-agnostic code review evaluation rubric. Evaluates changes through 13
+analytical lenses and filters candidate findings through the adversarial
+Inquisitor doctrine to eliminate reviewer theater and LLM noise.
+
+---
+
+## 🏛️ Part 1: The 13 Analytical Angles
+
+Every pull request diff must be evaluated across these 13 distinct lenses:
+
+### 1. Line Scan
+
+Audit local line-level syntax, types, and logic:
+
+- Nullability mismatches, unsafe bang operators (`!`), unhandled `null`
+  branches.
+- Off-by-one errors in slice ranges, array indexes, or loop termination bounds.
+- Dynamic type casts (`as Foo`) that can throw at runtime without prior type
+  checks (`is Foo`).
+- Boolean operator precedence and accidental assignment in conditional
+  expressions.
+
+### 2. Removed Behavior
+
+Audit what was deleted:
+
+- What invariants, error branches, or validations were removed?
+- Does deleted code silently break assumptions in un-modified caller files?
+- Were cleanup steps (e.g. closing streams, timers, file handles) accidentally
+  dropped?
+- Were fallback branches removed prematurely before downstream consumers
+  migrated?
+
+### 3. Cross-File Tracer
+
+Trace dependencies beyond the diff hunks:
+
+- Did an interface, signature, or exported type change without updating all call
+  sites?
+- Do package exports (`lib/<pkg>.dart`, `index.dart`, `__init__.py`, `mod.rs`)
+  avoid leaking internal helper types (`export 'src/...' show ...;`)?
+- When a refactor extracts helpers across files in a Dart package, require
+  public API surface verification (`dart run api_summary@^1.1.0 --check` if
+  `api.txt` is tracked, or before/after `api_summary` diff) to guarantee zero
+  unintended public API leaks.
+- Do mock implementations in test fixtures still mirror the updated production
+  contract?
+
+### 4. Language Pitfalls
+
+Check language-specific traps and footguns:
+
+- **Dart / Flutter**:
+  - Unawaited futures causing race conditions or floating exceptions.
+  - Mutating collections during iteration; missing `toList()` when transforming
+    lazy iterables.
+  - Stream subscriptions without cancellation in `dispose()`.
+  - Passing non-constant expressions into `const` constructors or using mutable
+    objects as default arguments.
+- **Go**:
+  - Goroutine leaks; channels with unbuffered writers that block indefinitely.
+  - Mutating loop variables across goroutines; missing `context.Context`
+    deadline propagation.
+- **Python**:
+  - Mutable default arguments (`def foo(bar=[])`).
+  - Unbounded global dicts causing memory leaks; catch-all `except:` swallowing
+    `KeyboardInterrupt` or `SystemExit`.
+
+### 5. Invariants & Wrappers
+
+Inspect abstraction boundaries and invariants:
+
+- Are domain invariants enforced in public constructors or factory methods?
+- Does a wrapper type leak its underlying implementation primitives to callers?
+- **Load-Bearing Library Boundary Rule (Dart)**: Does a file split widen
+  `_private` class members to `@internal` just to extract a separate `lib/src/`
+  library? Require `part` / `part of` (`Tier 2`) whenever types share privileged
+  library-scoped access (`sealed`, `final`, `interface`, `base`, private
+  constructors `._()`, or `_private` members), reserving standalone `lib/src/`
+  libraries (`Tier 1`) for cuts with zero visibility widening.
+- Are state transitions atomic, or can the object be left in an inconsistent
+  intermediate state upon failure?
+
+### 6. Error Handling
+
+Inspect exception and error paths:
+
+- Are exceptions swallowed silently or caught without logging/rethrowing?
+- Do functions return ambiguous `null` or `-1` instead of throwing typed,
+  informative error classes?
+- Is error context preserved when wrapping/re-throwing exceptions?
+
+### 7. Testing (Seam Discipline, Behavioral Assertions & Real Test Doubles)
+
+Scrutinize test quality, seam discipline, and assertion substance (`FU2`):
+
+- **Test Seam Discipline (`lib/<pkg>.dart` vs. `lib/src/` Deep Modules)**:
+  - Require package-level and integration tests to import the public
+    `package:<pkg>/<pkg>.dart` entrypoint, keeping `lib/<pkg>.dart` exports
+    strictly scoped to public consumers.
+  - Allow—and encourage—subsystem unit tests to import internal **deep modules**
+    (`package:<pkg>/src/<subsystem>.dart`, such as unexported parsers, state
+    machines, data models, or algorithms with simple interfaces and rich
+    internal logic), while requiring thin single-caller helpers to be tested
+    through their owning module's entrypoint.
+- **Behavioral & Boundary Assertions**: Require tests to assert observable
+  outputs, state transitions, and boundary conditions of code that consumes
+  constants and models against concrete expected values (rather than echoing
+  constant literals, DTO getters, or production formulas).
+- **Direct Execution & Rendering Verification**: Require runtime behavior,
+  control flow, and UI/CLI output to be verified by executing functions or
+  rendering components directly, reserving raw file-text reads
+  (`readAsStringSync()`) for `README.md` `--help` drift checks, `BUILD` /
+  `pubspec.yaml` metadata sync, and code-generator fixtures.
+- **Real Implementations & First-Party Fakes ("Tests That Can Fail")**: Require
+  real implementations (`package:test_descriptor` `d.sandbox`/`d.dir`,
+  `Directory.systemTemp`, loopback `HttpServer`, in-memory stores), first-party
+  fakes (`package:http/testing.dart` `MockClient`), or real `@TestOn('browser')`
+  runs for DOM and JS/Wasm interop so tests exercise real failure modes.
+- **Public API Surface Verification**: When refactors extract helpers across
+  files, require `dart run api_summary@^1.1.0` diff or `api.txt` verification so
+  extracted helpers do not leak into the public package entrypoint.
+- Do tests exercise negative paths, timeout behavior, and invalid inputs, or
+  only the happy path?
+- Does every bug fix include a deterministic regression test reproducing the
+  original issue?
+
+### 8. Reuse
+
+Check for wheel reinvention:
+
+- Does the diff introduce helper functions, math algorithms, or string parsers
+  that already exist in the standard library, core SDK, or existing project
+  dependencies (e.g. `package:collection`, `package:path`, `lodash`, `guava`)?
+- Is duplicate helper logic introduced across sibling modules instead of
+  consolidating into a common internal utility?
+
+### 9. Simplification
+
+The subtractive lens (eliminate over-engineering):
+
+- Is this more complex than the problem requires?
+- Does the change add premature abstractions, single-caller interfaces, stateful
+  single-use `_Populator` / `_Runner` helper classes that mutate caller
+  maps/sets in-place (prefer pure file-private functions), or speculative
+  configuration knobs that nothing uses?
+- **Shallow Single-Caller Pass-Through Helpers
+  (`cognitive_complexity:shallow`)**: Does the diff extract single-caller
+  (`FanIn == 1`, `TestFanIn == 0`) helpers that are high-arity (`>= 5`
+  parameters), micro-helpers (`< 5` body lines and `CC <= 1`), signature-heavy
+  (`SignatureLines >= BodyLines`), or placed in a sibling `lib/src/` file solely
+  to serve one caller (`CROSS_FILE_SINGLE_CALLER`)? When re-inlining keeps the
+  caller `<= 15` (`SAFE_INLINE`), flag the helper for direct re-inlining; when
+  `CallerCCAfter > 15` and `HelperCC <= 4` (`FLATTEN_AND_INLINE`), recommend
+  flattening the caller in place instead of bucket-brigading local variables
+  across helper signatures.
+- Can nested conditional branches be flattened with early-return guard clauses
+  or switch expressions?
+
+### 10. Efficiency
+
+Audit performance in hot paths:
+
+- Are expensive operations (JSON parsing, regex compilation, reflection,
+  filesystem I/O) executed inside tight loops?
+- Are collections repeatedly resized or allocated unnecessarily?
+- Are lookups performed via $O(N)$ linear scans when a `Set` or `Map` lookup
+  would be $O(1)$?
+
+### 11. Altitude
+
+Step back and evaluate high-level architectural coherence:
+
+- Does this feature or logic belong in this package/layer, or does it violate
+  separation of concerns?
+- Does the change solve the actual user problem, or does it apply a superficial
+  band-aid to a deeper structural flaw?
+
+### 12. Readability & Conventions
+
+Verify developer ergonomics and repository norms:
+
+- Are public APIs and exported symbols documented with clear, grammatically
+  sound docstrings?
+- Do variable and function names convey intent rather than implementation
+  mechanics?
+- Does the code follow repository style guidelines and pass formatters
+  (`dart format`, `gofmt`, `black`)?
+
+### 13. Cyclomatic Complexity
+
+Evaluate nesting and cognitive strain:
+
+- Are functions excessively long (>50 lines) or deeply indented (>3 levels)?
+- Does the function exceed the Cognitive Complexity ceiling (`> 15` for
+  production logic, `> 40` for tests)? Treat `8–15` as the healthy **Target
+  Zone**—never demand decomposing a cohesive function already `<= 15` into
+  single-caller micro-helpers just to chase `0`.
+- When decomposition is needed (`> 15`), can the logic be flattened in place
+  (guard clauses, switch expressions) or extracted into pure, testable
+  sub-functions with `<= 4` parameters and `sliceScoreAtRoot >= 3`?
+
+---
+
+## ⚖️ Part 2: The Inquisitor Doctrine ("Presumption of Theater")
+
+**Every candidate review finding is reviewer theater and pedantic noise until
+proven otherwise.**
+
+LLM reviewers suffer from severe incentive bias: they invent imaginary hazards
+to prove they performed work. The Inquisitor acts as an adversarial filter. A
+finding MUST demonstrate concrete, mechanical proof of runtime defect or
+measurable maintenance harm, or face summary dismissal.
+
+### The Five Inquisitorial Filters
+
+Filter every candidate finding against these five pathologies:
+
+1. **Imaginary Architecture & Unverified Assumptions**:
+   - _Trap_: The reviewer assumes an execution model, threading model, or API
+     contract absent from the codebase.
+   - _Rule_: If the reviewer cannot cite an exact call site or contractual
+     specification proving the assumption, **DISMISS** as
+     `[DISMISSED: INVENTED_ARCHITECTURE]`.
+
+2. **Synchronous Hand-Wringing & Defensive Paranoia**:
+   - _Trap_: Demanding thread locks, async mutexes, or memory barriers in
+     single-threaded, synchronous execution paths.
+   - _Rule_: If the scenario requires impossible execution interleavings or
+     paranoid double-checks, **DISMISS** as `[DISMISSED: PARANOIA]`.
+
+3. **Pedantic Escalation**:
+   - _Trap_: Elevating minor stylistic preferences, harmless setup repetition,
+     or test fixture boilerplate to "architectural flaws".
+   - _Rule_: If the code causes zero measurable harm to maintainability or
+     runtime safety, **DISMISS** as `[DISMISSED: PEDANTIC_ESCALATION]`.
+
+4. **Harmless Idempotence & Belt-and-Suspenders**:
+   - _Trap_: Complaining about defensive null-checks, idempotent resets, or
+     explicit cleanups because "the framework already handles it".
+   - _Rule_: If the pattern is harmless defensive programming that does not harm
+     readability or performance, **DISMISS** as `[DISMISSED: HARMLESS]`.
+
+5. **Hallucinated Dependencies & APIs**:
+   - _Trap_: Suggesting the author use third-party libraries, non-existent SDK
+     methods, or unverified packages.
+   - _Rule_: If the proposed replacement symbol or dependency cannot be verified
+     to exist in the repository's active dependencies or language SDK,
+     **DISMISS** as `[DISMISSED: HALLUCINATED_API]`.
+
+---
+
+## 🎯 Part 3: Severity Verdicts
+
+Only findings that survive the Inquisitor filters are reported. Assign exactly
+one severity:
+
+- **🚨 `[BLOCKING]`**: Must be addressed before merge. Correctness bugs, data
+  loss, race conditions, broken tests, security vulnerabilities, or public API
+  breaks.
+- **💡 `[SUGGESTION]`**: Highly recommended improvements. Measurable performance
+  wins, significant simplification, eliminating wheel reinvention, or missing
+  edge-case test coverage.
+- **🧹 `[HYGIENE_NIT]`**: Minor polish (dead imports, typos, docstring drift).
+  Keep only if accompanied by confirmed defects or high signal. If the PR has
+  zero blocking defects and zero suggestions, suppress cosmetic nits to deliver
+  a clean approval.
+
+---
+
+## ✂️ Part 4: Outbound Comment Compression ("Internal Proof vs. External Prose")
+
+The forensic detail required to pass **Part 2 (The Inquisitor Doctrine)** is for
+the local review report (`Internal Proof (Do Not Post)`), **never** for the
+outbound GitHub inline comment (`Outbound Inline Comment`).
+
+When drafting the outbound inline comment for a human PR author:
+
+1. **Hard Length Ceiling (`<= 50 words` / 2–3 sentences of prose)**:
+   - Sentence 1: State the concrete failure mode, edge case, or regression on
+     the pinned line.
+   - Sentence 2 (or a GitHub ` ```suggestion ` block): Show the exact fix or ask
+     the direct question.
+2. **Zero Call-Stack Narration**:
+   - Never narrate the PR author's own diff or call graph back to them (e.g., do
+     **not** write _"In `Foo.bar()`, you call `_helper()`, which reads `baz`
+     from `State` and passes it to..."_). The author just wrote that code and is
+     looking directly at the anchored diff line.
+3. **No Rubric Metadata or Emoji Banners**:
+   - Strip `[BLOCKING]`, `[SUGGESTION]`, `🚨`, `💡`, and angle numbers from
+     comments posted to GitHub.
