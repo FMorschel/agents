@@ -11,6 +11,7 @@ When writing small/quick scripts, prefer Dart, saved to `D:\dev\dart\scripts` (o
 ## Git
 
 - New repositories' default branch should be named `main`, never `master`. (`git config --global init.defaultBranch main` is already set — this just documents the preference for any repo/tool where that isn't picked up automatically.)
+- Whenever I ask for a "new project", initialize it as a git repository (`git init`) unless I say otherwise.
 
 ## Agents and skills
 
