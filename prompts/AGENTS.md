@@ -11,6 +11,7 @@ When writing small/quick scripts, prefer Dart, saved to `D:\dev\dart\scripts` (o
 ## Git
 
 - New repositories' default branch should be named `main`, never `master`. (`git config --global init.defaultBranch main` is already set — this just documents the preference for any repo/tool where that isn't picked up automatically.)
+- Whenever I ask for a "new project", initialize it as a git repository (`git init`) unless I say otherwise.
 
 ## Agents and skills
 
@@ -23,6 +24,16 @@ When writing small/quick scripts, prefer Dart, saved to `D:\dev\dart\scripts` (o
 - Minimal scope doesn't mean lower quality. Correctness, tests for the requested behavior, regression tests for fixes, and the post-edit workflow are always part of it.
 - If something would do more than asked — "just because", for completeness, "while I'm here", for future flexibility, or to make things "more secure"/"more robust" when the request didn't mention that — don't do it. Mention it briefly and ask whether it's necessary; it stays out unless I say yes.
 - This is a habit, not a ritual: no need to write out a formal MVC statement for ordinary tasks. The formal version (Outcome / Done when / Touches / Budget / Out of scope) lives in the `minimum-viable-change` skill and is used by the agent pipeline, or whenever a task is big enough that its scope needs pinning down.
+
+## Architecture
+
+- Whenever writing code, consider the layered architecture (see the `layered-architecture` skill). If the project has no architecture in place, use it; otherwise follow it as closely as possible while respecting the project's current structure and conventions.
+- At the very least, keep a clear separation of concerns in all code you write, even when no layered structure applies.
+- Keep SOLID in mind as an overall guide, but don't treat it as mandatory: apply it where it pays off and skip it where it would be overengineering for the project's size.
+- Prefer composition over inheritance.
+- Keep the public surface small: expose only what callers need and keep everything else private.
+- Design for testability: pure functions where possible, side effects at the edges.
+- Where practical, aim to make illegal states unrepresentable (sealed classes, enums, non-nullable types instead of flags and nullable fields kept in sync). This is a goal, not a requirement.
 
 ## Fixing bugs
 
