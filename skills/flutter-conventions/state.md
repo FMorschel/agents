@@ -43,11 +43,13 @@ class _MyWidgetState extends State<MyWidget> {
 5. `didUpdateWidget`
 6. `activate`
 7. `deactivate`
-8. `dispose`
-9. `setState`, only if overridden
-10. `build`
+8. `setState`, only if overridden
+9. Observer/listener callbacks from mixed-in or implemented interfaces, **only if the class has them**: `WidgetsBindingObserver` (`didChangeAppLifecycleState`, `didChangeMetrics`, `didChangeLocales`, `didChangePlatformBrightness`, …), `RestorationMixin` (`restoreState`, `didToggleBucket`), and similar. Alphabetical among themselves.
+10. Any other `@override` instance method the class has, in the normal `edit-dart-class` priority/alphabetical order.
+11. `dispose`
+12. `build`
 
-These members keep this relative order regardless of alphabetical order — note `build` sorts last here even though `edit-dart-class`'s default `@override` block would normally place it by priority/alphabetically among the other overrides. Any other `@override` instance method the class has is not part of this fixed list and keeps the normal `edit-dart-class` priority/alphabetical placement, always below these (after `build`), still ahead of the class's own non-override methods.
+These members keep this relative order regardless of alphabetical order. Within the `@override` block, `build` is always last and `dispose` always second to last: everything else overridden (observer callbacks, other overrides) comes before `dispose`. The class's own non-override methods follow `build`, as in `edit-dart-class`.
 
 `toString`, if present, still stays last in the whole class body per `edit-dart-class` — after `build`, not before it.
 
