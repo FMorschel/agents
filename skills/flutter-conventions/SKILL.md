@@ -1,6 +1,6 @@
 ---
 name: flutter-conventions
-description: "Use whenever you write, edit or review Flutter widget code: `State` classes (caching `.of(context)` lookups in didChangeDependencies, fixed lifecycle override order), widget composition (widget classes, not helper methods), rebuild scoping (narrow selectors, read vs. watch), theming, navigation, async UI states, controller ownership/disposal, and platform checks (avoid `Platform.isFoo`; guard with `!kIsWeb` when unavoidable). Index skill: load only the topic files that match the task."
+description: "Use whenever you write, edit or review Flutter widget code: `State` classes (caching `.of(context)` lookups in didChangeDependencies, fixed lifecycle override order, including `WidgetsBindingObserver`-style callbacks before `dispose`), widget composition (widget classes, not helper methods), rebuild scoping (narrow selectors, read vs. watch), theming, navigation, async UI states, controller ownership/disposal, and platform checks (avoid `Platform.isFoo`; guard with `!kIsWeb` when unavoidable). Index skill: load only the topic files that match the task."
 ---
 
 ## Flutter conventions
