@@ -12,6 +12,7 @@ When writing small/quick scripts, prefer Dart, saved to `D:\dev\dart\scripts` (o
 
 - New repositories' default branch should be named `main`, never `master`. (`git config --global init.defaultBranch main` is already set — this just documents the preference for any repo/tool where that isn't picked up automatically.)
 - Whenever I ask for a "new project", initialize it as a git repository (`git init`) unless I say otherwise.
+- Whenever I ask for a new branch, consider first rebasing the project's main/master onto its remote counterpart (fetch, then rebase the local main onto the remote's main), and create the new branch from that updated base. Skip the rebase and base the branch on what I name if I say which branch or commit it should start from.
 
 ## Agents and skills
 
@@ -46,6 +47,7 @@ When writing small/quick scripts, prefer Dart, saved to `D:\dev\dart\scripts` (o
 ## Tool preference
 
 - **Always prefer MCP tools over equivalent CLI commands.** If an MCP server exposes a tool that does the same thing as a shell command (e.g. the Dart MCP server's analyze/fix/format/test/pub tools vs. running `dart analyze`(or `puro dart analyze`)/`dart fix`(or `puro dart fix`)/`dart format`(or `puro dart format`)/`dart test -r failures-only`/`dart pub` in Bash), use the MCP tool. Only fall back to the CLI when no MCP equivalent exists or the MCP tool fails.
+- **Don't format by hand or fix non-semantic lints yourself while building.** Formatting and lints that don't change meaning (whitespace, ordering, trailing commas, `prefer_const`-style fixes, etc.) are handled by the formatter and `fix` tooling, via the CLI or MCP. Only hand-edit a lint when it needs a real semantic decision the tools can't make.
 
 ## Adding Dart/Flutter packages
 
@@ -62,6 +64,10 @@ When writing small/quick scripts, prefer Dart, saved to `D:\dev\dart\scripts` (o
 ## Debugging Dart/Flutter apps
 
 - **Prefer connecting to the already-running app via the Dart Tooling Daemon (DTD) over starting a new debug session.** Ask the user for a DTD URI (e.g. `dart mcp-server` / editor's DTD URI, usually printed when the app is launched with `--print-dtd` or shown in the IDE's Dart/Flutter debug session) and connect the Dart MCP server to it. Only if the user doesn't have one available should you fall back to launching/debugging the app yourself — e.g. running it as Flutter web, or whatever other approach fits the situation — instead of asking them to find one.
+
+## Getters vs. no-parameter methods (Dart)
+
+- When creating a getter or a method with no parameters, make it a getter if: (1) its processing is stable and mostly side-effect-free, and (2) the return type is non-`Future`, or a clear future the caller should always await (e.g. `Completer.future`). Otherwise keep it a method. See `design-dart-class`.
 
 ## Post-edit Dart workflow
 
