@@ -37,6 +37,8 @@ The agents are independent and read-only, so launch all selected agents in **one
 
 If an agent rejects a finding the analyzer does not back, the `dart-edit-protocol` epistemic rule applies: nobody calls code incorrect unless `dart analyze` agrees.
 
+**Line length.** Only check line length if the `lines_longer_than_80_chars` lint is not enabled; when it is on, the analyzer already reports long lines, so skip it. (That lint may be renamed, see sdk/issues/59552, so match it by its current name and check the enabled-lints list again if it stops matching.) Otherwise, for each file, find the nearest `analysis_options.yaml` by walking up from the file's directory, and follow its `include:` entries (recursively, resolving relative paths) until you find `formatter.page_width`. Measure the long lines with a command (e.g. `awk 'length > N' file`) against that value. If no `analysis_options.yaml` sets it, assume 80 and say so in the report.
+
 ### 4. Report
 
 One consolidated report, not seven pasted ones:

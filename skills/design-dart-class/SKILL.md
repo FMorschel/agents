@@ -65,6 +65,15 @@ When adding a value that is derived from other members, pick the form by its cos
 
 Pick the lightest form that satisfies the value's cost and semantics; don't turn existing members from one form into another as a drive-by — only when you're already changing them or adding a new one. Where a member lands in the class body follows from its form (getter → accessors section, field → fields section, per `edit-dart-class`), so changing the form also changes its position.
 
+### Getter or no-parameter method?
+
+When creating a getter or a method with no parameters, make it a getter if:
+
+1. its processing is stable and mostly side-effect-free, and
+2. the return type is not a `Future`, or it is a clear future the caller should always await (e.g. `Completer.future`).
+
+Otherwise (side effects, unstable or costly work, or a future that is merely the result of an operation) keep it a method.
+
 ### Mutability
 
 Data classes are `const` and immutable: `final` fields, a `const` constructor, and a `copyWith` (or similar) when callers need a changed copy. Controllers, services and other stateful classes may be mutable, but only when they actually hold state; a stateless service should still be `const`.
