@@ -13,17 +13,17 @@ Nothing is "done" until the loop below completes clean — analyzer silent, test
 
 | Step | Dart MCP tool | CLI fallback |
 |---|---|---|
-| fix | `dart_fix` | `dart fix --apply` (`puro dart fix --apply`) |
-| format | `dart_format` | `dart format` |
+| fix | `analyze_files` with `applyFixes: true` | `dart fix --apply` (`puro dart fix --apply`) |
+| format | none | `dart format <files>` |
 | analyze | `analyze_files` | `dart analyze` |
-| tests | `run_tests` | `dart test -r failures-only` (`flutter test`) |
+| tests | none | `dart test -r failures-only` (`flutter test`) |
 | dependencies | `pub` | `dart pub` / `flutter pub` |
 
-Fall back to the CLI only when the server is not connected in this session, has no tool for what you need, or its tool fails. In that case say so in your report ("Dart MCP unavailable, used CLI") so the reader knows which tooling produced the result. Tool names above are the server's usual ones; if your session exposes them differently, use whichever tool does the same job.
+Format and tests have no MCP tool, so the CLI is expected for those two steps. Fall back to the CLI for any step when the server is not connected in this session or its tool fails. In that case say so in your report ("Dart MCP unavailable, used CLI") so the reader knows which tooling produced the result. The full tool list and how to use each is in `skills/dart-mcp/SKILL.md`.
 
 ### Setup (once per session, before the first Dart MCP call)
 
-The Dart MCP server's analysis, fix, format and pub tools act on registered roots; with none registered they have nothing to work on. Register the workspace root first with the server's roots tool (`set_roots` / `add_roots`).
+The Dart MCP server's analysis and pub tools act on registered roots; with none registered they have nothing to work on. Register the workspace root first with the `roots` tool (`command: "add"`, `uris: ["file:///..."]`).
 
 ### The loop
 
@@ -52,6 +52,16 @@ When several packages are needed, add them in **one** `pub add` call (mix runtim
 - **`tester`**: production code does not exist yet, so this step's new tests are *expected* to fail at step 5. Loop only for tooling problems in the test file (format, analyzer diagnostics), and confirm the failure is the expected `UnimplementedError`/missing-symbol one.
 - **`api doc writer`**: you only touch doc comments and stubs, so it is a fast pass — still not optional.
 - **`implementer` / `scope arbiter` handoffs**: report "tests pass" only after the loop finished clean; otherwise report the exact remaining diagnostic or failure.
+
+### Visual changes: check the live app yourself
+
+Whenever you need to know whether a UI change looks right or whether something else changed visually, do not ask the user to check it. Connect to a running app and check it yourself:
+
+1. Get a DTD URI and connect the Dart SDK MCP server to the running app (see `find-dtd-uri`; ask the user only if no DTD is available).
+2. Use `widget_inspector` to find the widget, then `flutter_driver_command` with `command: "screenshot"` to capture it. Use `get_diagnostics_tree` or `get_text` when the screenshot alone is not enough.
+3. Compare the screenshot with what the request asked for and report what you saw, with the screenshot.
+
+If the change must not alter the UI, also add or keep a golden test (see `write-dart-tests`) so the next change that does alter it fails loudly.
 
 ### The epistemic rule (binds every reviewing agent, not just editors)
 
