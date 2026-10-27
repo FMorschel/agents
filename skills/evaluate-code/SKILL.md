@@ -28,6 +28,7 @@ Run every agent that is meaningful, skip the ones that cannot apply. Skipping is
 | `dart-modernization-agent` | the target is more than a trivial file (fetches the SDK changelog) |
 | `coverage-auditor` | the target has tests and the user asked for a broad evaluation, or the target is a whole feature |
 | `ui-surface-agent` | only when the user also asks about UI consistency |
+| `flutter-visual-reviewer` | only when the user also asks whether a UI change looks right or caused visual regressions, and a debug app is reachable. It stashes the working tree for the baseline, so it runs only with the user's agreement and alone (not in parallel with anything that edits or reads the tree) |
 
 Not part of evaluation: `gap-finder`, `scope-arbiter`, `engineering-balance-critic` (they compare against a plan or request; there is none). Use `engineering-balance-critic` only if the user asks whether the code is over- or under-engineered, run on the code itself.
 

@@ -75,7 +75,7 @@ Before navigating by tapping and scrolling, read `.agents/screens-navigation/` f
 - The driver and inspector tools need the app running in debug mode with DTD. They cannot see a release build or a device the app is not on.
 - `hot_reload` on a non-Flutter Dart CLI program does not work. Use `hot_restart` only on Flutter apps.
 - `rip_grep_packages` needs ripgrep installed on the host. If it fails, use `read_package_uris` on specific files instead.
-- The Dart SDK tools do not replace tests. A passing screenshot does not prove logic is correct; use golden tests (see `write-dart-tests`) to guard appearance.
+- The Dart SDK tools do not replace tests. A passing screenshot does not prove logic is correct; use golden tests (see `write-flutter-ui-tests`) to guard appearance. To check a UI change against a baseline with these tools, follow `review-flutter-visual-changes`.
 
 ### Epistemic rule
 

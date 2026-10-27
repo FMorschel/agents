@@ -20,4 +20,6 @@ Read only the files that match what you are touching:
 | TextEditingController, FocusNode, AnimationController, etc. | [controllers.md](controllers.md) |
 | `Platform.isFoo`, `kIsWeb`, `defaultTargetPlatform`, per-platform branching | [platform.md](platform.md) |
 
+Related skills: `write-flutter-ui-tests` (widget, golden and integration tests) and `review-flutter-visual-changes` (verifying in the running app that a visual change looks right and nothing unrelated moved).
+
 After editing Dart files, follow the post-edit Dart workflow from the global instructions: `dart fix --apply`, `dart analyze` (fix every diagnostic), then `dart format` on each edited file.

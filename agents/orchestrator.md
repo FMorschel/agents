@@ -200,6 +200,8 @@ One artifact does travel between agents rather than being re-derived: the **axis
 
 `ui-surface-agent` gets only the current step's plan (from `step-planner`) — never the tester's tests or the implementer's diff, since it runs before either exists for that step. It only runs at all when the step touches UI surface (`R`); skip it entirely for backend/logic-only steps rather than calling it and expecting a no-op report.
 
+`flutter-visual-reviewer` is separate and optional: after `implementer` finishes a step that changes how a widget or screen looks or lays out, and a debug app is reachable over DTD, it can check the live result before and after (see `review-flutter-visual-changes`). It needs the step's changed files and target screens, nothing else. Because it stashes the working tree for its baseline, run it alone (nothing else editing the tree) and only with human agreement; in autonomous mode, skip it and flag the step as "visual check pending" in the report. Its regressions and visual bugs are blocking: route back to `implementer`. Missing golden or widget tests it reports go to `tester`, per `write-flutter-ui-tests`.
+
 ## Definition of done for a fix
 
 Any run whose purpose is to **fix something that is broken** — a confirmed bug, a failing case, a reported defect, a regression — is not complete until a regression test exists for it. This is a hard rule you enforce as router, and it applies regardless of which entry point the fix came in through (bug hunt, narrow single-concern request, or a fix routed into the main graph).

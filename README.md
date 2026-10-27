@@ -56,7 +56,7 @@ Other entry points:
 | --- | --- |
 | Process | `minimum-viable-change`, `run-pipeline`, `resolve-project-conventions`, `place-project-knowledge`, `compose-commits` |
 | Dart | `dart-edit-protocol`, `design-dart-class`, `edit-dart-class`, `comment-code`, `use-dart-analyzer` |
-| Flutter | `flutter-conventions` (index over widgets, state, rebuilds, controllers, navigation, theming, async UI), `review-flutter-async-and-disposal` |
+| Flutter | `flutter-conventions` (index over widgets, state, rebuilds, controllers, navigation, theming, async UI), `review-flutter-async-and-disposal`, `review-flutter-visual-changes` (live-app before/after check, run by `flutter visual reviewer`), `document-app-navigation` (notes in `.agents/screens-navigation/` on how to reach a screen) |
 | Architecture | `layered-architecture` |
 | Testing | `write-dart-tests` (with `test-case-matrix.md`), `write-flutter-ui-tests` (widget, golden, integration), `write-regression-test` |
 | Docs & releases | `write-requirements`, `write-changelog-and-semver` |
