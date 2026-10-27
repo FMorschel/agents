@@ -61,7 +61,9 @@ Whenever you need to know whether a UI change looks right or whether something e
 2. Use `widget_inspector` to find the widget, then `flutter_driver_command` with `command: "screenshot"` to capture it. Use `get_diagnostics_tree` or `get_text` when the screenshot alone is not enough.
 3. Compare the screenshot with what the request asked for and report what you saw, with the screenshot.
 
-If the change must not alter the UI, also add or keep a golden test (see `write-dart-tests`) so the next change that does alter it fails loudly.
+For a full before/after comparison (baseline via stash, regression and visual-bug checklist), follow `review-flutter-visual-changes` or hand it to `flutter visual reviewer`.
+
+If the change must not alter the UI, also add or keep a golden test (see `write-flutter-ui-tests`) so the next change that does alter it fails loudly.
 
 ### The epistemic rule (binds every reviewing agent, not just editors)
 
