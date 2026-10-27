@@ -48,7 +48,7 @@ There is no MCP tool for `dart format`, `dart fix` on its own, or running tests.
 
 ### Running apps
 
-1. Use `dtd` `listDtdUris` to find a running DTD. If the list is empty, ask the user to start the app with `--print-dtd`, or follow `find-dtd-uri`.
+1. Use `dtd` `listDtdUris` to find a running DTD. If the list is empty, follow `find-dtd-uri`: its first attempt is `launch-session-via-dart-code` (VS Code starts the session through `.dart_code/autolaunch.json`), and only then launching the app yourself.
 2. `dtd` `connect` with that URI. The apps on that DTD connect automatically; `listConnectedApps` shows them and their `appUri`.
 3. Pass `appUri` to the other app tools whenever more than one app is connected.
 
@@ -59,6 +59,22 @@ There is no MCP tool for `dart format`, `dart fix` on its own, or running tests.
 3. For interactions, use a finder taken from the tree: `ByValueKey` with `keyValueString` and `keyValueType`, `ByText` with `text`, `ByTooltipMessage`, `BySemanticsLabel`, or `ByType`. Then `tap`, `enter_text`, `scroll`, or `waitFor`. Never guess a finder.
 4. `get_text` reads a widget's text. `get_diagnostics_tree` (`diagnosticsType: "widget"` or `"renderObject"`) gives layout and state detail when a screenshot is not enough.
 5. `timeout` defaults to 5000 ms. Raise it for slow screens; do not treat a timeout as proof that a widget is missing without checking the tree.
+
+#### Typing text into fields
+
+Text entry through the driver only works if the app is started through an entry point (the app's `main`, or a driver entry point such as `lib/driver_main.dart` that calls the real `main()` afterwards, as launched by the project's `launch.json`; see `find-dtd-uri`) that starts with:
+
+```dart
+enableFlutterDriverExtension(enableTextEntryEmulation: false);
+```
+
+With emulation off at startup, the developer keeps using the real keyboard. To type as the agent:
+
+1. Call `flutter_driver_command` with `command: "set_text_entry_emulation"` and `enabled: "true"`. Without it, `enter_text` and `send_text_input_action` do nothing useful.
+2. Use `enter_text` (finder + `text`) and, if needed, `send_text_input_action`.
+3. **Release it as soon as you are done typing, and always before you finish your work:** `set_text_entry_emulation` with `enabled: "false"`. Left on, the developer cannot type in the app with their own keyboard. Release it even if a step failed or you are stopping early.
+
+If `main` does not start with that call, say so and ask the user to add it (or to approve you adding it); do not edit their `main` unasked. The call also belongs only in debug/driver entry points, not in release code.
 
 #### Reaching a screen
 
@@ -76,6 +92,10 @@ Before navigating by tapping and scrolling, read `.agents/screens-navigation/` f
 - `hot_reload` on a non-Flutter Dart CLI program does not work. Use `hot_restart` only on Flutter apps.
 - `rip_grep_packages` needs ripgrep installed on the host. If it fails, use `read_package_uris` on specific files instead.
 - The Dart SDK tools do not replace tests. A passing screenshot does not prove logic is correct; use golden tests (see `write-flutter-ui-tests`) to guard appearance. To check a UI change against a baseline with these tools, follow `review-flutter-visual-changes`.
+
+### When something goes wrong
+
+If a tool call fails, times out or behaves unusually (connection refused, no app, driver errors, hot reload not applying), read the user's logs with `find-session-logs` (`mcp.log`, `<name>_dap.log`, `dtd.log`, `extension.log`) before retrying or guessing.
 
 ### Epistemic rule
 

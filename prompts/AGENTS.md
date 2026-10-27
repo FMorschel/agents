@@ -63,7 +63,8 @@ When writing small/quick scripts, prefer Dart, saved to `D:\dev\dart\scripts` (o
 
 ## Debugging Dart/Flutter apps
 
-- **Prefer connecting to the already-running app via the Dart Tooling Daemon (DTD) over starting a new debug session.** Ask the user for a DTD URI (e.g. `dart mcp-server` / editor's DTD URI, usually printed when the app is launched with `--print-dtd` or shown in the IDE's Dart/Flutter debug session) and connect the Dart MCP server to it. Only if the user doesn't have one available should you fall back to launching/debugging the app yourself — e.g. running it as Flutter web, or whatever other approach fits the situation — instead of asking them to find one.
+- **Prefer connecting to the already-running app via the Dart Tooling Daemon (DTD) over starting a new debug session.** Ask the user for a DTD URI (e.g. `dart mcp-server` / editor's DTD URI, usually printed when the app is launched with `--print-dtd` or shown in the IDE's Dart/Flutter debug session) and connect the Dart MCP server to it. If none is running, first try `launch-session-via-dart-code` (VS Code open on the project starts the session through `.dart_code/autolaunch.json`, then connect to its DTD); only if that does not apply or fails, fall back to launching/debugging the app yourself — e.g. running it as Flutter web, or whatever other approach fits the situation — instead of asking them to find one.
+- **Typing text into the running app needs driver text entry emulation.** The app's `main` must start with `enableFlutterDriverExtension(enableTextEntryEmulation: false);`. Before typing, call `flutter_driver_command` `set_text_entry_emulation` with `enabled: "true"`; when done typing, and always before you finish your work (even on failure), call it with `enabled: "false"` so the developer can use their own keyboard again. See the `dart-mcp` skill.
 
 ## Getters vs. no-parameter methods (Dart)
 
