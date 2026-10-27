@@ -44,4 +44,4 @@ The test must **fail against the pre-fix code and pass against the fixed code**.
 
 ### When the bug can't be reproduced in a unit test
 
-Escalate to the smallest test level that can (integration or widget test) rather than dropping the test. If no automated test is feasible, do not silently skip: state why, propose the closest guard (an assertion, a lint, a documented manual check), and get an explicit human decision.
+Escalate to the smallest test level that can (integration or widget test; a visual bug may need a golden, see `write-flutter-ui-tests`) rather than dropping the test. If no automated test is feasible, do not silently skip: state why, propose the closest guard (an assertion, a lint, a documented manual check), and get an explicit human decision.

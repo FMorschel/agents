@@ -58,7 +58,7 @@ Other entry points:
 | Dart | `dart-edit-protocol`, `design-dart-class`, `edit-dart-class`, `comment-code`, `use-dart-analyzer` |
 | Flutter | `flutter-conventions` (index over widgets, state, rebuilds, controllers, navigation, theming, async UI), `review-flutter-async-and-disposal` |
 | Architecture | `layered-architecture` |
-| Testing | `write-dart-tests` (with `test-case-matrix.md`), `write-regression-test` |
+| Testing | `write-dart-tests` (with `test-case-matrix.md`), `write-flutter-ui-tests` (widget, golden, integration), `write-regression-test` |
 | Docs & releases | `write-requirements`, `write-changelog-and-semver` |
 
 ## Adding things
