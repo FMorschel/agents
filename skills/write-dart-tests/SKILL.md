@@ -45,7 +45,11 @@ Before writing the first test, look at 2–3 existing test files next to the cod
 - Inject a clock / random source; never `DateTime.now()` inside a test's expectation. Prefer `package:clock` (`clock.now()`) over a hand-rolled clock abstraction, and use `withClock`/a fake `Clock` in tests to control it.
 - Use in-memory implementations or temp directories for IO, cleaned up in `tearDown`.
 - **No network in unit tests.** If a test genuinely needs network (e.g. an integration test exercising a real client), it must never point at an official/production source — use a sandbox/staging endpoint, a local mock server, or a dedicated test account, never the real service.
-- For Flutter: `testWidgets` with `pumpWidget`, `pump`/`pumpAndSettle` deliberately, finders by key or type, and dispose controllers you create.
+
+### Flutter UI
+
+- `testWidgets` with `pumpWidget`, `pump`/`pumpAndSettle` deliberately, finders by key or type, and dispose controllers you create.
+- **Guard UI appearance with golden tests.** When a widget's look must stay the same (or a change to it must be deliberate), add a `matchesGoldenFile` assertion on the widget's finder, pumped at a fixed size and theme. Follow the repo's existing golden setup; if it has none, use `flutter_test`'s built-in `matchesGoldenFile` and say so in your report. Update goldens only for an intended visual change (`flutter test --update-goldens`), never to silence a failure.
 
 ### Fail-first check (contract-first work)
 
