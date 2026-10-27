@@ -59,6 +59,8 @@ Check the **after** state against each. Look in the screenshot *and* in `get_run
 
 Before driving the app to a screen, read `.agents/screens-navigation/` for a known route; if getting there (or to a state) takes real effort, record it per `document-app-navigation`. Reach each state by driving the app (`tap`, `enter_text`, `scroll`, `waitFor`) using finders taken from the tree, not by assuming it works.
 
+Typing: `enter_text` needs the app's `main` to start with `enableFlutterDriverExtension(enableTextEntryEmulation: false);` and `flutter_driver_command` `set_text_entry_emulation` `enabled: "true"` called first. When you are done typing, and always before you finish the review, call it with `enabled: "false"` so the developer can type with their own keyboard again (see `dart-mcp`).
+
 ### 5. Test coverage of the change
 
 State whether the change is guarded: a widget test for behavior and a golden test for appearance where the look must stay stable (rules in `write-flutter-ui-tests`). Run the existing tests that touch the changed widgets (`flutter test <paths>`; there is no MCP tool for it) and report failures verbatim. A golden that fails after an *unintended* difference is a finding; do not update goldens to make it pass. Use `flutter test --update-goldens` only for differences you confirmed are intended, and list which goldens changed.

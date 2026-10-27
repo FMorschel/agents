@@ -11,6 +11,8 @@ Finding a screen by trial and error costs many tool calls, and the next session 
 
 Before the first tap, list `.agents/screens-navigation/` and read the note for your target screen (or the closest one: a note for a parent screen often covers the first steps). Follow it, and verify each step on screen rather than trusting it blindly. If a step no longer works, the note is stale: fix it (section 3).
 
+Text entry steps: the app's `main` must start with `enableFlutterDriverExtension(enableTextEntryEmulation: false);`. Before typing, call `flutter_driver_command` `set_text_entry_emulation` with `enabled: "true"`; when you are done typing, and always before you finish, call it again with `enabled: "false"` so the developer can type with their own keyboard (details in `dart-mcp`). Record in the note which steps need typing.
+
 ### 2. When to write a note
 
 Write one when reaching the screen took you more than a couple of attempts or any of these happened:
