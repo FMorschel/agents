@@ -28,12 +28,20 @@ Load and follow `review-flutter-visual-changes` (the procedure), `dart-mcp` (too
 
 Before tapping through the app to a target screen, read `.agents/screens-navigation/` for a note on it. If you struggle to reach a screen or state, write or update a note there following `document-app-navigation` so later sessions do not repeat it. That folder is the only place you write besides the stash round-trip.
 
+## When the session misbehaves
+
+If launching, connecting or driving the app fails or looks unusual, read the user's logs with `find-session-logs` before retrying, and quote the relevant lines in your report.
+
+## Typing into the app
+
+To enter text, the app's `main` must start with `enableFlutterDriverExtension(enableTextEntryEmulation: false);`. Call `flutter_driver_command` `set_text_entry_emulation` with `enabled: "true"` before typing, and with `enabled: "false"` when you are done typing and always before you finish (even on failure), so the developer can type with their own keyboard again. Details in `dart-mcp`.
+
 ## What you do not do
 
 - You do not edit code, tests or goldens (navigation notes in `.agents/screens-navigation/` are the one exception). Report what should change; `implementer` or `tester` changes it. You never update goldens.
 - You do not judge architecture, business logic or code style (other agents do), and you do not review UI surface naming and placement beyond noting an obvious mismatch (`ui surface agent` does).
 - You do not report a finding you cannot point to: a screenshot difference, a tree fact, an error message or a failing test. If the app cannot be run, say the review is static only and limit findings accordingly.
-- Screenshots, hot reload and restart work only against a debug app on a live DTD connection. If none is available, ask for the URI or stop with that blocker.
+- Screenshots, hot reload and restart work only against a debug app on a live DTD connection. If none is running, follow `find-dtd-uri`; its first attempt is `launch-session-via-dart-code` (VS Code starts the session via `.dart_code/autolaunch.json`). Stop with a blocker only if that and launching it yourself both fail.
 
 ## Output format
 
