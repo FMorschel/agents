@@ -48,6 +48,8 @@ Before writing the first test, look at 2–3 existing test files next to the cod
 
 ### Flutter UI
 
+Widget, golden and integration test rules live in `write-flutter-ui-tests`; load it for any UI test. The short version:
+
 - `testWidgets` with `pumpWidget`, `pump`/`pumpAndSettle` deliberately, finders by key or type, and dispose controllers you create.
 - **Guard UI appearance with golden tests.** When a widget's look must stay the same (or a change to it must be deliberate), add a `matchesGoldenFile` assertion on the widget's finder, pumped at a fixed size and theme. Follow the repo's existing golden setup; if it has none, use `flutter_test`'s built-in `matchesGoldenFile` and say so in your report. Update goldens only for an intended visual change (`flutter test --update-goldens`), never to silence a failure.
 
