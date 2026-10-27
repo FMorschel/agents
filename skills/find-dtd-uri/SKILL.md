@@ -28,3 +28,14 @@ The `dart` on `PATH` may be too old to know the command. Use the `use-home-dart`
 ## If the list is empty
 
 No DTD is running. Fall back to launching the app yourself, as described in the global "Debugging Dart/Flutter apps" instructions, rather than asking the user to find a URI.
+
+<!-- EXPERIMENT: this section relies on Dart-Code's experimental `.dart_code/autolaunch.json` and is untested. Revisit once it has been tried in practice. -->
+
+### Let the user take over the session you started
+
+When you launch the app yourself from scratch, also write an attach configuration to `.dart_code/autolaunch.json` in the workspace root, so the user's VS Code (Dart-Code, [Dart-Code#5516](https://github.com/Dart-Code/Dart-Code/issues/5516), experimental) attaches to your running app on its own. They can then keep debugging when you finish or if you get stuck, without relaunching.
+
+- Same format as `launch.json`: a `"configurations"` list. Use `"request": "attach"`, `"type": "dart"` and the app's VM service URI (`vmServiceUri`), taken from the launch output. Name it so it is clearly yours, e.g. `Attach (Claude session)`.
+- Never put this in `launch.json`: that file is usually committed. Make sure `.dart_code/` is gitignored; if it is not, tell the user rather than editing `.gitignore` unasked.
+- The VM service URI dies with the app. Overwrite the file when you relaunch, and delete it when you stop the app, so the IDE does not try to attach to a dead session.
+- Do this only when you started the app. If you connected to the user's existing DTD, they already have a session.
