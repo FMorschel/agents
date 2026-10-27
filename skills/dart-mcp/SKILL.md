@@ -60,6 +60,10 @@ There is no MCP tool for `dart format`, `dart fix` on its own, or running tests.
 4. `get_text` reads a widget's text. `get_diagnostics_tree` (`diagnosticsType: "widget"` or `"renderObject"`) gives layout and state detail when a screenshot is not enough.
 5. `timeout` defaults to 5000 ms. Raise it for slow screens; do not treat a timeout as proof that a widget is missing without checking the tree.
 
+#### Reaching a screen
+
+Before navigating by tapping and scrolling, read `.agents/screens-navigation/` for a note on the target screen. If you struggle to reach a screen (dead ends, hidden controls, preconditions, waits), write or update a note there so the next session does not; the procedure is in `document-app-navigation`.
+
 #### After editing running code
 
 - `hot_reload` keeps state and does not update global or const values.
