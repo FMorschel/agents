@@ -1,6 +1,6 @@
 ---
 name: find-session-logs
-description: Use whenever you need the user's session logs: Dart analyzer, DAP/debug, DevTools, MCP server, Flutter daemon, DTD, VS Code extension logs, etc. Say, to diagnose an analyzer crash, a debug-session problem or an MCP failure. Also use when a debug session, launch, DTD connection or driver command fails, stalls or behaves unusually, before guessing or retrying blindly. Explains where the logs live and how they are named.
+description: Use whenever you need the user's session logs: Dart analyzer, DAP/debug, DevTools, MCP server, Flutter daemon, DTD, VS Code extension logs, etc. Say, to diagnose an analyzer crash, a debug-session problem or an MCP failure. Also use when a debug session, launch, DTD connection or driver command fails, stalls or behaves unusually, and when the running app itself shows an error (an error screen, a failed request, or a stack trace/exception the user pastes, such as a 4xx/5xx from a backend API), before guessing or retrying blindly. Explains where the logs live and how they are named.
 ---
 
 # Finding session logs
@@ -49,6 +49,17 @@ Read the logs before retrying or guessing. Start with the symptom:
 | `hot_reload`, driver or `dtd` MCP call fails or times out | `mcp.log`, then `<name>_dap.log` |
 | Device or emulator not found | `flutterDaemon.log` |
 | Widget inspector / DevTools errors | `devtools.log` |
+| The running app shows an error, or the user pastes an exception/stack trace (e.g. a failed API request) | `<name>_dap.log` of the session running the app: it holds the app's console output, so the full error and the lines before it are there. Read it before asking the user for more output or changing anything |
+
+## When the error comes from a backend API
+
+A pasted trace like `403`/`503` from an API is the app's side of the failure. Before starting, restarting or killing anything, and before asking the user which instance to use:
+
+1. Read the app's own HTTP logging. The app is the one party that always saw the request and the response, so its log usually names the cause (status, error code and message, URI, body) even with no backend log. Look in two places:
+   - the session's `<name>_dap.log` (the app's console output, around the failing request), and
+   - the app's own log files, if it writes any (e.g. myapp: `%APPDATA%\RECH INFORMÁTICA\myapp\logs\<profile>\log_<date>.txt`). Check the project's docs or its log service for the path.
+2. If the app does not log that request or response (URI, status, body, headers that matter), say so and propose adding the logging, then reproduce and read it. This is cheap and beats guessing.
+3. Read the backend's own logs too, if the project documents where they are. Only then decide whether the backend needs starting or fixing. When the user says "there should be an api running", treat that as "find out why it isn't answering", not as "start another one".
 
 Tail the file and filter to the time window of the failure. Quote the relevant lines in your report.
 

@@ -52,7 +52,7 @@ Check the **after** state against each. Look in the screenshot *and* in `get_run
 | Theme | light **and** dark mode, hard-coded colors that ignore the theme, low contrast, wrong elevation/shape (`flutter-conventions` `theming.md`) |
 | Responsive/platform | narrow phone, wide desktop, mobile vs. desktop navigation, orientation; resize and re-check |
 | Text | long strings, long translations, large text scale (1.5-2.0), empty and null values |
-| States | loading, empty, error, many items, disabled, focused, hovered, pressed, selected |
+| States | loading, empty, error, many items, disabled, focused, hovered, pressed, selected. If a screen shows an error state (e.g. failed to load data), do not guess the cause from the screenshot: read the session's `<name>_dap.log` with `find-session-logs` for the actual exception first |
 | Interaction | the screen still scrolls, taps hit the intended target, nothing flickers or jumps on rebuild |
 | Accessibility | semantics labels on new interactive elements, sensible focus order |
 | Consistency | icons, labels and placement match sibling screens (`ui surface agent` covers this in depth) |
