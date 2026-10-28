@@ -1,9 +1,11 @@
 ---
 name: improve-test-coverage
-description: "Use when the user asks for tests on existing code, more coverage, to cover the gaps, to backfill tests, or to check whether tests are good enough. Chooses between test-writer (never-tested code) and coverage-auditor + tester (gaps in tested code), folds in pending regression-test backlog entries, and finishes with test-adequacy-reviewer."
+description: "Use when the user asks for tests on existing code, more coverage, to cover the gaps, or to backfill tests (for only "what's missing / are these tests enough", use `review-test-adequacy`). Chooses between test-writer (never-tested code) and coverage-auditor + tester (gaps in tested code), folds in pending regression-test backlog entries, and finishes with test-adequacy-reviewer."
 ---
 
 ## Improving test coverage
+
+If the user only asked **what is missing** or whether the tests are good enough, and not for tests to be written, use `review-test-adequacy` on its own (report-only) and offer this skill as the next step.
 
 The orchestrator's *narrow: more coverage* route and the existing-feature `test-writer` entry, as a standalone flow. No requirements, no plan, no contract changes. Production code is never edited.
 

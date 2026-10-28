@@ -7,6 +7,8 @@ description: "Use when the user asks to evaluate, review, audit, check or give f
 
 This is the review half of the orchestrator pipeline (`H` per-step checks and `J` end-of-feature passes) on its own, for code that did not come through the pipeline. Do **not** spawn the `orchestrator` for this: there is no plan, no phases and nothing to implement. Call the review agents directly.
 
+When the question is narrow (only the tests, only duplication, only newer-Dart opportunities, only sensitive-data handling), skip the selection below and load the matching skill instead: `review-test-adequacy`, `review-duplicate-code`, `review-dart-modernization` or `review-sensitive-data`. The agents in the table load the same skills.
+
 ### 1. Scope the target
 
 Resolve what is being evaluated: a path, `git diff` against a base, a branch, or a feature area. Read the file list and skim enough to answer the selection questions below. State the MVC in one line (`Outcome: evaluate X`, `Touches: nothing`) and pass it to every agent. Evaluation never changes files.
