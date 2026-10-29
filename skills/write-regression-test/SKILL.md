@@ -14,9 +14,35 @@ Write the test itself following `write-dart-tests`; this skill adds what is spec
 - **Test-owning agents only**: `tester` (new-feature flow) or `test writer` (existing-feature flow). `implementer` never writes it, even for a one-line fix. The implementer reports `fix applied — regression test still needed`.
 - `bug verifier` never writes it either: its throwaway repro and the backlog entry are the *source* for the test, not the test.
 
+### The backlog
+
+Confirmed bugs waiting for a regression test are recorded in `specs/regression-test-backlog.md` **in the project being debugged** (create it on the first entry), not in this agents repo. `bug verifier` appends an entry when it reaches CONFIRMED; whoever writes the test closes it. Entries are discovery artifacts, not diffs: the test is written fresh from them.
+
+Each entry holds:
+
+- **Bug ID**: `BUG-001`, or the issue tracker reference.
+- **Hypothesis**: the falsifiable claim that was checked.
+- **Root cause location**: exact `file:line`.
+- **What went wrong**: the symptom and the mechanism, concisely.
+- **Minimal repro**: test case, input data or steps (copy the verifier's throwaway test).
+- **Confirmation method**: existing test, throwaway repro, or static trace.
+- **Date discovered**.
+- **Status**: *pending regression test* or *regression test merged*.
+
+```text
+### BUG-001: Off-by-one in pagination cursor
+Hypothesis: the cursor calculation at lib/src/paginator.dart:42 ignores zero-indexed arrays.
+Root cause: lib/src/paginator.dart:42, _calculateNextCursor() adds 1 to the length instead of to the index.
+What went wrong: with pageSize 10 and 25 items, the last page's cursor points past the end, so the next request returns nothing though data remains.
+Minimal repro: paginate 25 items by 10; the third page's cursor is 26 and the expected [20..24] never arrives.
+Confirmation method: throwaway test in the scratchpad fails on current code.
+Date discovered: 2026-09-14
+Status: pending regression test
+```
+
 ### Source material
 
-1. Find the entry in `agents/Bug Hunt/regression-test-backlog.md` for this module (or the report/issue if there is none). Take the **defect location**, **what went wrong**, and the **minimal repro**.
+1. Find the entry in the project's `specs/regression-test-backlog.md` for this module (or the report/issue if there is none). Take the **defect location**, **what went wrong**, and the **minimal repro**.
 2. Read the defect location yourself. The repro shows *that* it fails; you need to know *why*, so the test asserts the right thing and not the incidental symptom.
 
 ### Shape of the test

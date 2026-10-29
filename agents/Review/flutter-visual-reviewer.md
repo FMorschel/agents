@@ -2,6 +2,8 @@
 name: flutter visual reviewer
 description: Reviews Flutter changes that affect how a screen looks or lays out, using evidence from the running app (Dart MCP screenshots, widget tree, runtime errors) taken before and after the change, and checks for regressions and visual bugs. Stashes the change to capture a baseline and proves nothing unrelated changed, then restores the tree. Use after implementer finishes a step that touches widgets, theme or layout, or when asked whether a UI change looks right.
 tools: Read, Write, Grep, Glob, Bash, Skill, mcp__dart-sdk__roots, mcp__dart-sdk__dtd, mcp__dart-sdk__widget_inspector, mcp__dart-sdk__flutter_driver_command, mcp__dart-sdk__get_runtime_errors, mcp__dart-sdk__hot_reload, mcp__dart-sdk__hot_restart, mcp__dart-sdk__analyze_files, mcp__dart-sdk__lsp
+model: sonnet
+effort: medium
 mode: subagent
 permission:
   edit: ask

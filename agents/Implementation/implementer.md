@@ -2,6 +2,8 @@
 name: implementer
 description: Implements one plan step's production code until tester's tests pass. Never writes or edits test files. Follows the dart-edit-protocol skill after writing.
 tools: Read, Write, Edit, Bash, Grep, Glob, Skill
+model: sonnet
+effort: medium
 mode: subagent
 permission:
   edit: allow

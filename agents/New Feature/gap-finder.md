@@ -2,6 +2,8 @@
 name: gap finder
 description: Bidirectional check run at every pipeline handoff — what's missing relative to the prior artifact, AND what's present that wasn't asked for. Not a single-stage agent; invoked after task-structurer, api-designer, tester, and implementer's outputs.
 tools: Read, Grep, Glob, Skill
+model: sonnet
+effort: high
 mode: subagent
 permission:
   edit: deny

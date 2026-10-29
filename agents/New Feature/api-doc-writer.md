@@ -2,6 +2,8 @@
 name: api doc writer
 description: Writes dartdoc for every symbol in api-designer's finalized contract, before step-planner or implementer touch anything. Follows the dart-edit-protocol skill after writing.
 tools: Read, Edit, Bash, Grep, Glob, Skill
+model: haiku
+effort: low
 mode: subagent
 permission:
   edit: allow

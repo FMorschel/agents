@@ -7,9 +7,12 @@ My personal collection of Claude Code agents, skills and global prompts (`CLAUDE
 ```text
 agents/
   orchestrator.md        Router that drives the whole pipeline
-  New Feature/           Pipeline stages and reviewers for new work
-  Existing Feature/      Backfill requirements / tests for untested code
-  Bug Hunt/              Hypothesis → verification loop, regression-test backlog
+  New Feature/           Requirements, contract and plan stages, plus the checks between them
+  Implementation/        implementer, tester, test-writer (used by every flow)
+  Review/                Reviewers and end-of-feature passes (also run standalone)
+  Release/               commit-composer, pubdev-release-agent
+  Existing Feature/      Recover requirements for already-built code
+  Bug Hunt/              Hypothesis → verification loop
 skills/                  Reusable rules and procedures the agents (and I) load
 prompts/AGENTS.md        My global instructions (scripting, git, MVC, Dart workflow)
 ```
@@ -47,7 +50,7 @@ Other entry points:
 | Situation | Agents |
 | --- | --- |
 | Code exists, no tests/requirements | `test-writer`, `requirements-analyst`, then join the main graph at review |
-| Something is broken | `bug-hypothesis-former` → `bug-verifier` loop; confirmed bugs go to `regression-test-backlog.md` |
+| Something is broken | `bug-hypothesis-former` → `bug-verifier` loop; confirmed bugs go to the project's `specs/regression-test-backlog.md` |
 | One bounded task (add coverage, split a file) | Straight to the relevant agent(s), skipping requirements/contract/plan |
 
 ## Skills
