@@ -2,6 +2,8 @@
 name: task structurer
 description: Turns a raw feature idea or bug report into numbered FRs/NFRs plus rough layer impact — no signatures, no API design. Use at the very start of any nontrivial piece of work.
 tools: Read, Grep, Glob, Skill
+model: sonnet
+effort: high
 mode: subagent
 permission:
   edit: deny

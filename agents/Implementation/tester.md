@@ -2,6 +2,8 @@
 name: tester
 description: Writes tests for one plan step, from its contract slice — before the implementer writes the corresponding code. Sweeps skills/write-dart-tests/test-case-matrix.md before writing. Never edits production code. Follows the dart-edit-protocol skill after writing.
 tools: Read, Write, Edit, Bash, Grep, Glob, Skill
+model: sonnet
+effort: medium
 mode: subagent
 permission:
   edit: allow

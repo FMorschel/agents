@@ -2,6 +2,8 @@
 name: test adequacy reviewer
 description: Checks whether tester's tests actually pin the business logic implementer ended up writing, not just call the API. Also verifies the axis sweep from skills/write-dart-tests/test-case-matrix.md against the finished code. Runs AFTER implementer, unlike tester itself — needs the finished implementation to compare against.
 tools: Read, Grep, Glob, Skill
+model: sonnet
+effort: high
 mode: subagent
 permission:
   edit: deny

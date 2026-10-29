@@ -2,6 +2,8 @@
 name: bug verifier
 description: Takes exactly one hypothesis from bug-hypothesis-former and determines whether it's actually true — reading the code path, tracing execution, and where possible running or writing a minimal check to confirm or refute it. Reports a verdict plus evidence; never fixes the bug itself. Use once per hypothesis, most-likely-first, until one is confirmed or the batch is exhausted.
 tools: Read, Grep, Glob, Bash, Skill
+model: sonnet
+effort: high
 mode: subagent
 permission:
   edit: deny
@@ -35,7 +37,7 @@ You take exactly one hypothesis at a time: the specific claim, its evidence poin
 - Never edit production code to fix what you find, even if the fix looks trivial and obvious. Report the confirmed root cause and stop.
 - Any repro script or test you write to check the hypothesis is temporary — keep it out of the project's real test suite and out of the repo, and say in your report that you created and discarded (or where you left) it.
 - Don't silently expand scope to "while I was in there, I also checked…" without flagging it as a separate aside — your report must make clear which hypothesis the verdict actually covers.
-- **When a verdict is CONFIRMED:** save the repro steps and test case to the [Regression Test Backlog](regression-test-backlog.md) so that `test-writer` or the implementer can later create a proper regression test to prevent recurrence. Include: the exact file:line of the defect, a description of what went wrong, and the minimal repro (test case, input data, or execution steps) you used to verify it.
+- **When a verdict is CONFIRMED:** append an entry (format in the `write-regression-test` skill) to the project's `specs/regression-test-backlog.md`, creating it if needed, so that `test-writer` or the implementer can later create a proper regression test to prevent recurrence. Include: the exact file:line of the defect, a description of what went wrong, and the minimal repro (test case, input data, or execution steps) you used to verify it.
 
 ## Output format
 

@@ -2,6 +2,8 @@
 name: memory safety agent
 description: Finds memory leaks (disposal lifecycle, uncancelled subscriptions/listeners) and memory-saving opportunities — but only suggests savings that don't cost readability or performance. Use on changed files after implementer finishes a step.
 tools: Read, Grep, Glob, Skill
+model: haiku
+effort: low
 mode: subagent
 permission:
   edit: deny

@@ -13,7 +13,7 @@ The orchestrator's *Bug hunt* entry point as a standalone flow. Do not spawn the
 2. Hand hypotheses to `bug-verifier` **one per call, most likely first**. Independent hypotheses may be verified in parallel (one `Agent` call each, same message) when they touch different code paths and none needs the previous verdict; otherwise go sequentially.
 3. CONFIRMED ends the hunt. REFUTED or INCONCLUSIVE goes back to `bug-hypothesis-former` with the verifier's evidence for the next batch. Stop when confirmed or the evidence runs out, and say which.
 
-Neither agent edits code. The confirmed repro lands in `agents/Bug Hunt/regression-test-backlog.md` via `bug-verifier`.
+Neither agent edits code. The confirmed repro lands in the project's `specs/regression-test-backlog.md` via `bug-verifier` (format in `write-regression-test`).
 
 ### 2. Report the diagnosis
 

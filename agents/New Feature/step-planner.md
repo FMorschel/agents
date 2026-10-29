@@ -2,6 +2,8 @@
 name: step planner
 description: Takes api-designer's finalized (and now documented) contract plus the original requirements, and decomposes them into an ordered implementation plan of phases, each containing atomic steps. Use after api-doc-writer, before tester/implementer start.
 tools: Read, Grep, Glob, Skill
+model: sonnet
+effort: medium
 mode: subagent
 permission:
   edit: deny

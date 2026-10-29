@@ -2,6 +2,8 @@
 name: orchestrator
 description: Coordinates the full pipeline — knows the agent graph, assembles per-agent context, enforces retry/escalation policy, and switches between autonomous and human-gated modes. Not a domain specialist; produces no findings of its own. Halts and reports at every phase boundary (PB) instead of continuing — the caller must spawn a *fresh* orchestrator to resume the next phase (never SendMessage to the halted one); see the `run-pipeline` skill for the exact resume loop.
 tools: Read, Grep, Glob, Bash, Agent, SendMessage, ListAgents, Write, Edit, Skill
+model: sonnet
+effort: medium
 mode: primary
 permission:
   edit: allow
@@ -54,7 +56,7 @@ This is bookkeeping to protect the run, not a deliverable — don't mention the 
 A run doesn't always start from a blank page. Pick the entry point based on what already exists for the target code:
 
 - **New feature** (default): nothing exists yet — start at `task-structurer` (`A`), then pick the route by the MVC's `Budget` (see [Sizing the route](#sizing-the-route-by-the-mvc)). Only `medium`/`large` changes follow the graph below from the top.
-- **Existing feature**: the implementation is already written (and maybe partially tested), but it was never routed through this pipeline, so it's missing requirements, tests, or both. Use the agents in `Existing Feature/` instead of walking `A`→`G` from scratch:
+- **Existing feature**: the implementation is already written (and maybe partially tested), but it was never routed through this pipeline, so it's missing requirements, tests, or both. Use `requirements-analyst` (`Existing Feature/`) and `test-writer` (`Implementation/`) instead of walking `A`→`G` from scratch:
   - Tests exist, requirements don't → start at `requirements-analyst` (`P`) alone.
   - Requirements exist (or aren't needed), tests don't → start at `test-writer` (`Q`) alone.
   - Neither exists → start at `test-writer`, then hand its tests to `requirements-analyst` (tests first — `requirements-analyst`'s own spec cross-references implementation *and* tests to tell a real requirement from an accident; without tests it's reading code in isolation and has nothing to check against).
@@ -62,14 +64,14 @@ A run doesn't always start from a blank page. Pick the entry point based on what
 - **Bug hunt**: something is broken and the task is to find *where*, not to build or restructure anything yet. Use the agents in `Bug Hunt/` as a standalone loop, independent of the graph below:
   - Give `bug-hypothesis-former` the bug report, symptoms, logs, stack traces, or repro steps. It returns a ranked, falsifiable list of hypotheses — never a verdict.
   - Hand its top hypothesis, one at a time, to `bug-verifier`, which reports CONFIRMED, REFUTED, or INCONCLUSIVE with evidence.
-  - CONFIRMED ends the hunt — `bug-verifier` saves the minimal repro to the [Regression Test Backlog](Bug%20Hunt/regression-test-backlog.md) for later conversion to a regression test. Hand the confirmed root cause to the user, or, if a fix is wanted:
+  - CONFIRMED ends the hunt — `bug-verifier` saves the minimal repro to the project's `specs/regression-test-backlog.md` (format in the `write-regression-test` skill) for later conversion to a regression test. Hand the confirmed root cause to the user, or, if a fix is wanted:
     - **Regression test first:** route to `test-writer` (existing-feature entry) to backfill a regression test for that module before the fix goes in, using the backlog entry as the source. This creates a green-then-red-then-green test cycle: the new regression test starts failing against current code (red), the implementer fixes it (green).
     - **Then implement the fix:** the fix's MVC is the narrowest change at the confirmed root cause plus its regression test, and nothing else. Refactoring around the bug, hardening nearby code or fixing "similar" spots are unrequested extras to ask about. Route into the normal pipeline at whichever of `A`-`G` fits the size of the fix (usually straight to `implementer` for a bug fix, or through `task-structurer` if the fix involves API/contract changes).
     - The regression test is not optional here — see [Definition of done for a fix](#definition-of-done-for-a-fix). A confirmed bug that gets fixed without one is an incomplete run, even if the fix itself is correct and the suite is green.
   - REFUTED or INCONCLUSIVE goes back to `bug-hypothesis-former` along with `bug-verifier`'s findings, to produce the next batch; repeat until confirmed or the evidence runs out.
   - Neither agent edits code or the main graph's artifacts — this loop produces a diagnosis, not a change. Only route to `A`-`G` (or `test-writer`) afterward if the user wants the confirmed bug actually fixed or tested.
 - **Narrow, single-concern request**: the user names one specific, bounded improvement — "add more test coverage here," "split this file into smaller ones," "extract this into its own module," "rename X to Y" — and wants exactly that, not a trip through the whole pipeline. No new requirements, no contract change, no plan. Route directly to the agent(s) that do that one thing, skipping `A`-`E` entirely:
-  - *More coverage / cover the gaps*: run `coverage-auditor` on the target to find what's actually uncovered, then hand its findings to `tester` (or `test-writer` if the code never had structured tests) to backfill only the missing cases. Also check the [Regression Test Backlog](Bug%20Hunt/regression-test-backlog.md) — if there are pending regression tests for this module, include those alongside the coverage gaps. Follow with `test-adequacy-reviewer` to confirm the new tests pin behavior, not just touch lines.
+  - *More coverage / cover the gaps*: run `coverage-auditor` on the target to find what's actually uncovered, then hand its findings to `tester` (or `test-writer` if the code never had structured tests) to backfill only the missing cases. Also check the project's `specs/regression-test-backlog.md` — if there are pending regression tests for this module, include those alongside the coverage gaps. Follow with `test-adequacy-reviewer` to confirm the new tests pin behavior, not just touch lines.
   - *Split/reorganize into more files or folders*: this is a pure move, no behavior change — go straight to `implementer` for the mechanical reshuffle, then `architecture-guardian` and `convention-agent` to confirm the new boundaries and naming fit project layout, plus `duplicate-code-detector` if the split risked leaving near-duplicate leftovers. Existing tests are the safety net; don't route through `tester` unless the move actually changes the public contract.
   - *Fix this bug / this is broken*: when the target is a defect rather than an improvement, the narrow route still ends at a regression test — see [Definition of done for a fix](#definition-of-done-for-a-fix). Route the fix to `implementer` and the test to `tester`/`test-writer`; "narrow" scopes down the artifact-producing stages, never the test that proves the defect is gone.
   - Either way: stay inside the stated scope. If the narrow task surfaces something that looks like it needs `task-structurer`-level rework or an API change, don't silently expand into it — surface it and let the user decide, the same way `scope-arbiter` would flag an unplanned addition in the main pipeline. Only widen into the full `A`→`G` graph if the user actually asks for that.
@@ -209,7 +211,7 @@ Any run whose purpose is to **fix something that is broken** — a confirmed bug
 The test must:
 
 - **Fail against the pre-fix code and pass against the fixed code.** If it passes both ways it isn't pinning the defect, and the fix isn't done — route it back for a real one.
-- **Live in the project's test suite**, not in a scratchpad. `bug-verifier`'s throwaway repro and the [Regression Test Backlog](Bug%20Hunt/regression-test-backlog.md) entry are the *source* for the test, never the test itself.
+- **Live in the project's test suite**, not in a scratchpad. `bug-verifier`'s throwaway repro and the project's `specs/regression-test-backlog.md` entry are the *source* for the test, never the test itself.
 - **Be written by a test-owning agent** — `tester` (new-feature flow) or `test-writer` (existing-feature flow). `implementer` never writes it; that ground rule doesn't relax for bug fixes.
 
 Ordering: write the regression test *before* the fix wherever the code is reachable enough to test — red first, then green — so the test is demonstrated to catch the defect rather than merely asserted to. Where writing it first isn't practical (the fix changes the surface the test needs), write it immediately after and verify it fails by reverting the fix locally.
