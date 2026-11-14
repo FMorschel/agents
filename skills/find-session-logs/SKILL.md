@@ -57,7 +57,7 @@ A pasted trace like `403`/`503` from an API is the app's side of the failure. Be
 
 1. Read the app's own HTTP logging. The app is the one party that always saw the request and the response, so its log usually names the cause (status, error code and message, URI, body) even with no backend log. Look in two places:
    - the session's `<name>_dap.log` (the app's console output, around the failing request), and
-   - the app's own log files, if it writes any (e.g. myapp: `%APPDATA%\<redacted> INFORMÁTICA\myapp\logs\<profile>\log_<date>.txt`). Check the project's docs or its log service for the path.
+   - the app's own log files, if it writes any (e.g. `%APPDATA%\<vendor>\<app>\logs\<profile>\log_<date>.txt`). Check the project's docs or its log service for the path.
 2. If the app does not log that request or response (URI, status, body, headers that matter), say so and propose adding the logging, then reproduce and read it. This is cheap and beats guessing.
 3. Read the backend's own logs too, if the project documents where they are. Only then decide whether the backend needs starting or fixing. When the user says "there should be an api running", treat that as "find out why it isn't answering", not as "start another one".
 

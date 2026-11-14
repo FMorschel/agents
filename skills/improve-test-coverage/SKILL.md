@@ -1,6 +1,6 @@
 ---
 name: improve-test-coverage
-description: "Use when the user asks for tests on existing code, more coverage, to cover the gaps, or to backfill tests (for only "what's missing / are these tests enough", use `review-test-adequacy`). Chooses between test-writer (never-tested code) and coverage-auditor + tester (gaps in tested code), folds in pending regression-test backlog entries, and finishes with test-adequacy-reviewer."
+description: "Use when the user asks for tests on existing code, more coverage, to cover the gaps, or to backfill tests (for only \"what's missing / are these tests enough\", use `review-test-adequacy`). Chooses between test-writer (never-tested code) and coverage-auditor + tester (gaps in tested code), folds in pending regression-test backlog entries, and finishes with test-adequacy-reviewer."
 ---
 
 ## Improving test coverage
