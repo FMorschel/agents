@@ -15,6 +15,9 @@ agents/
   Bug Hunt/              Hypothesis → verification loop
 skills/                  Reusable rules and procedures the agents (and I) load
 prompts/AGENTS.md        My global instructions (scripting, git, MVC, Dart workflow)
+plugin_builder/          Dart project that builds the cross-platform plugin package
+plugin_builder/specs/    Design docs (e.g. cross-platform plugin packaging)
+plugin.config.json       Build config for it
 ```
 
 `agents/.run-state/` (in-flight run state) and `skills/synced/` are git-ignored.
@@ -64,6 +67,44 @@ Other entry points:
 | Testing | `write-dart-tests` (with `test-case-matrix.md`), `write-flutter-ui-tests` (widget, golden, integration), `write-regression-test` |
 | Review (report-only, also run by the matching agents) | `review-test-adequacy` (what test cases are missing), `review-duplicate-code`, `review-dart-modernization`, `review-sensitive-data` |
 | Docs & releases | `write-requirements`, `write-changelog-and-semver` |
+
+## Plugins (cross-platform)
+
+The same source builds into one self-contained folder per client (Claude Code, Codex, VS Code/Copilot, plus a vendor-neutral portable one). The generic recipe is in [`plugin_builder/specs/cross-platform-plugin-packaging.md`](plugin_builder/specs/cross-platform-plugin-packaging.md).
+
+Build it (writes git-ignored output to `dist/<client>/`):
+
+```bash
+dart run plugin_builder:build_plugin --config ../plugin.config.json --clean
+```
+
+Run it from `plugin_builder/` (the generator, a small Dart project in this repo; `dart pub get` once first). Its tests: `dart test` in the same folder. `--targets claude,codex` builds only some clients; `--list-targets` prints the supported ones.
+
+```text
+dist/
+├── claude/    marketplace root + install.sh / install.ps1; plugin in claude/agents/
+├── codex/     marketplace root + install.sh / install.ps1; plugin in codex/agents/
+├── vscode/    plugin in vscode/agents/
+└── portable-v1.0/  Agent Plugins 1.0, skills + MCP only; plugin in portable-v1.0/agents/
+```
+
+Each folder holds a full copy of the skills and the `global-instructions` skill, plus only what that client needs (manifest, agents in its own format, MCP config, marketplace file).
+
+Install: run the generated script, or load by hand.
+
+| Client | Script | By hand |
+| --- | --- | --- |
+| Claude Code | `dist/claude/install.sh` or `install.ps1` | `claude --plugin-dir dist/claude/agents` |
+| Codex | `dist/codex/install.sh` or `install.ps1` (copies the agents into `~/.codex/agents`, since Codex loads no plugin agents, then registers the marketplace and installs the plugin) | `codex plugin marketplace add ./dist/codex`, `codex plugin add agents@agents`, copy `dist/codex/agents/.codex/agents/*.toml` into `~/.codex/agents/` |
+| VS Code / Copilot | none (no CLI to install plugins) | enable `chat.plugins.enabled`, then add `dist/vscode/agents` as a plugin location |
+
+The Codex script asks before replacing a same-named `.toml` already in `~/.codex/agents` (or `$CODEX_HOME/agents`); a no skips that file. Pass `--yes` (`-Yes` for `install.ps1`) to replace without asking. `--clean` asks before deleting `--out` and fails when there is no terminal to ask on; `--yes` skips the question. It also refuses to run when `--out` is, or contains, the source, agents, prompts or MCP file.
+
+Validate with `claude plugin validate dist/claude/agents` and `claude plugin validate dist/claude`.
+
+**Adding a client.** Implement `Harness` (`plugin_builder/lib/src/harness.dart`: an `id` and an `emit(context)` that writes that client's files) in `plugin_builder/lib/src/harnesses/`, then add it to `builtInHarnesses`. The core already copies the skills and writes the prompts skill; the new client appears as `dist/<id>/` and as a `--targets` value.
+
+**Version bump.** The version lives in `plugin.config.json`; edit it, rebuild, and reload in each client.
 
 ## Adding things
 
