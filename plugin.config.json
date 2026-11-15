@@ -1,0 +1,12 @@
+{
+  "name": "agents",
+  "version": "0.1.0",
+  "description": "Personal Dart/Flutter agents, skills and global instructions.",
+  "author": "FMorschel",
+  "source": ".",
+  "out": "dist",
+  "prompts": "prompts/AGENTS.md",
+  "mcp": "mcp/.mcp.json",
+  "targets": ["portable-v1.0", "claude", "codex", "vscode"],
+  "exclude": ["synced"]
+}

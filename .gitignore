@@ -2,3 +2,6 @@ agents/.run-state/
 skills/synced/
 **/.claude/
 .work-identifiers
+/dist/
+.dart_tool/
+/plugin_builder/.mcp.json
