@@ -1,6 +1,4 @@
 agents/.run-state/
 skills/synced/
 **/.claude/
-/skills/<redacted>-lookup
-/skills/<redacted>
-/skills/write-<redacted>-observacoes-simulacao
+.work-identifiers
