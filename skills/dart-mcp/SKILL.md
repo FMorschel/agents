@@ -52,6 +52,15 @@ There is no MCP tool for `dart format`, `dart fix` on its own, or running tests.
 2. `dtd` `connect` with that URI. The apps on that DTD connect automatically; `listConnectedApps` shows them and their `appUri`.
 3. Pass `appUri` to the other app tools whenever more than one app is connected.
 
+#### Choosing an Android or iOS emulator
+
+When the app has to be launched on an Android emulator or iOS simulator, do not just take the first device in the list. Before launching, list the available ones and name the one you would use:
+
+- Android: `flutter emulators` (or `emulator -list-avds`). iOS: `xcrun simctl list devices available`.
+- Prefer a general-purpose device with a size in its name, such as `Small Phone`, `Medium Phone`, or `Large Tablet`. Pick the size that fits the screen under test (small for layout overflow, large or tablet for responsive layouts). If the name carries no size, a plain phone model such as `Pixel 6` is fine.
+- Avoid emulators whose names point at integration tests, CI, or automation (for example `integration_test_*`, `ci_*`, `test_*`, `*_automation`). They are often configured for test runs, not for the developer.
+- If no size or plain device matches, or the choice is unclear, ask the user which one to use rather than guessing.
+
 #### Looking at the UI
 
 1. `widget_inspector` `get_widget_tree` (use `summaryOnly: true` to see only user-code widgets) to get real text, keys, and types.

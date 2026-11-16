@@ -58,4 +58,4 @@ In `.vscode/launch.json`, make every Flutter profile launch `lib/driver_main.dar
 
 ### 4. Verify
 
-Launch through the new configuration (`flutter run -t lib/driver_main.dart`), connect the DTD (`dart-mcp`), and confirm `flutter_driver_command` `get_health` answers and a `screenshot` works. Report which files you added and what you ran; if you could not launch the app, say the setup is unverified.
+Before launching on an Android emulator or iOS simulator, pick the device as `dart-mcp` describes (list the available ones, prefer a general small/medium/large device, avoid integration-test or CI-named ones, ask if unclear). Do not hard-code that device into `launch.json` unless the user asks. Launch through the new configuration (`flutter run -t lib/driver_main.dart -d <device>`), connect the DTD (`dart-mcp`), and confirm `flutter_driver_command` `get_health` answers and a `screenshot` works. Report which files you added and what you ran; if you could not launch the app, say the setup is unverified.
