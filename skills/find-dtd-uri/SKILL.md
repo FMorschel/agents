@@ -5,6 +5,8 @@ description: Use whenever you need a Dart Tooling Daemon (DTD) URI, e.g. to conn
 
 # Finding a DTD URI
 
+Prefer connecting to the already-running app over starting a new debug session. Only start one yourself when there is no running app (see below).
+
 Before asking the user for a DTD URI, list the running ones:
 
 ```bash
@@ -29,7 +31,7 @@ The `dart` on `PATH` may be too old to know the command. Use the `use-home-dart`
 
 A DTD can exist with no app on it: VS Code with Dart-Code runs one as soon as the project is open. After connecting, `dtd` `listConnectedApps` tells you; if it returns no app, there is no session and this section applies exactly as for an empty list. Do not treat "a DTD is listed" as "a session exists". A listed DTD with no app is also strong evidence that VS Code is open on the project.
 
-No app is running. **First attempt: follow `launch-session-via-dart-code`.** If VS Code is open on the project, write `.dart_code/autolaunch.json` so Dart-Code starts the session, then find and connect to its DTD. Do not launch the app yourself first and do not ask the user to find a URI. Only if that skill's preferred path does not apply (no VS Code window on the project) or produced no session, launch the app yourself as described below (that skill's fallback leaves an attach config for the user).
+No app is running. **First attempt: follow `launch-session-via-dart-code`.** If VS Code is open on the project, write `.dart_code/autolaunch.json` so Dart-Code starts the session, then find and connect to its DTD. Do not launch the app yourself first and do not ask the user to find a URI. Only if that skill's preferred path does not apply (no VS Code window on the project) or produced no session, launch the app yourself as described below (that skill's fallback leaves an attach config for the user). Use whatever approach fits the situation (e.g. running it as Flutter web); do not fall back to asking the user to find a DTD URI.
 
 ### Start the session the way the project does
 

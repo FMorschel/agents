@@ -28,7 +28,7 @@ There is no MCP tool for `dart format`, `dart fix` on its own, or running tests.
 
 ### Setup
 
-1. Call `roots` with `command: "add"` and the workspace as a `file:///` URI. Every analysis, lsp, pub, and package tool fails or does nothing without a root.
+1. Before the first Dart MCP tool call in a session, call `roots` with `command: "add"` (or `set_roots` / `add_roots`, whichever the server exposes) and the current workspace as a `file:///` URI. Every analysis, lsp, pub, and package tool fails or does nothing without a root.
 2. Only then call the other tools.
 
 ### Analysis and fixes
