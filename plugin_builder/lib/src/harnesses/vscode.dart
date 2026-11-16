@@ -1,13 +1,15 @@
 import '../agent.dart';
 import '../escape.dart';
 import '../harness.dart';
+import '../install_script.dart';
 import 'portable.dart';
 
 /// VS Code / Copilot: the portable package plus
 /// `com.github.copilot/agents/*.agent.md`.
 ///
 /// VS Code has no CLI to install a plugin (it is enabled through settings),
-/// so no install scripts are written.
+/// so install scripts are written only when the MCP servers need environment
+/// variables (they just ask for them).
 class VsCodeHarness implements Harness {
   const VsCodeHarness();
 
@@ -26,6 +28,16 @@ class VsCodeHarness implements Harness {
       context
         ..writeInPackage(path, copilotAgentFile(agent))
         ..detail('  vscode: $path');
+    }
+    // No plugin to install, so the scripts exist only to ask for the MCP
+    // servers' environment variables.
+    var prompts = envVarPrompts(context.mcpServers);
+    if (prompts.isNotEmpty) {
+      writeInstallScripts(
+        context,
+        prompts,
+        title: '${context.options.name} for VS Code',
+      );
     }
   }
 }

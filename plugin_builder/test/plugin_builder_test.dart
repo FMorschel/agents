@@ -214,6 +214,46 @@ void main() {
       ]);
     });
 
+    test('MCP environment variables are asked for by every installer', () {
+      workspace.write(
+        '/src/mcp.json',
+        '{"mcpServers": {"example": {"type": "http", "url": "https://x.dev", '
+            r'"headers": {"Authorization": "Bearer ${EXAMPLE_TOKEN}"}}}}',
+      );
+      workspace
+          .builder(workspace.options(extra: ['--mcp', '/src/mcp.json']))
+          .build();
+
+      for (var id in ['claude', 'codex', 'vscode']) {
+        expect(
+          workspace.read('/out/$id/install.sh'),
+          contains('EXAMPLE_TOKEN'),
+          reason: '$id install.sh',
+        );
+        expect(
+          workspace.read('/out/$id/install.ps1'),
+          contains('EXAMPLE_TOKEN'),
+          reason: '$id install.ps1',
+        );
+      }
+      var claude = workspace.read('/out/claude/install.sh');
+      expect(
+        claude.indexOf('EXAMPLE_TOKEN'),
+        lessThan(claude.indexOf('marketplace')),
+      );
+      expect(workspace.exists('/out/portable-v1.0/install.sh'), isFalse);
+    });
+
+    test(
+      'VS Code gets no installer when no environment variable is needed',
+      () {
+        workspace.builder(workspace.options()).build();
+
+        expect(workspace.exists('/out/vscode/install.sh'), isFalse);
+        expect(workspace.exists('/out/vscode/install.ps1'), isFalse);
+      },
+    );
+
     test('Codex installer copies the agents it wrote', () {
       workspace.builder(workspace.options()).build();
 

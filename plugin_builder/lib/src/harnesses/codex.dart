@@ -37,6 +37,7 @@ class CodexHarness implements Harness {
       _marketplace(options),
     );
     writeInstallScripts(context, [
+      ...envVarPrompts(context.mcpServers),
       if (context.agents.isNotEmpty)
         CopyFiles(
           'Copy the agents into the Codex agents folder',

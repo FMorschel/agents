@@ -52,6 +52,81 @@ void main() {
     expect(ps, contains('Overwrite? [y/N]'));
   });
 
+  group('PromptEnvVar', () {
+    var steps = [PromptEnvVar('EXAMPLE_TOKEN')];
+
+    test('shell installer reads silently and keeps what already exists', () {
+      var sh = renderShellInstaller(steps, title: 'demo');
+
+      expect(sh, contains("echo '[1/1] Set the EXAMPLE_TOKEN environment"));
+      expect(sh, contains(r'if [ -n "${EXAMPLE_TOKEN:-}" ]; then'));
+      expect(sh, contains("grep -qs '^export EXAMPLE_TOKEN='"));
+      expect(sh, contains('elif [ ! -t 0 ]; then'));
+      expect(sh, contains('stty -echo'));
+      expect(sh, contains(r'>> "$profile"'));
+      expect(sh, isNot(contains('@NAME@')));
+    });
+
+    test(
+      'PowerShell installer reads a secure string and keeps what exists',
+      () {
+        var ps = renderPowerShellInstaller(steps, title: 'demo');
+
+        expect(ps, contains("GetEnvironmentVariable('EXAMPLE_TOKEN')"));
+        expect(ps, contains('[Console]::IsInputRedirected'));
+        expect(ps, contains('-AsSecureString'));
+        expect(ps, contains(r"SetEnvironmentVariable('EXAMPLE_TOKEN', $Value"));
+        expect(ps, isNot(contains('@NAME@')));
+      },
+    );
+
+    test('rejects a name that is not an environment variable name', () {
+      expect(
+        () => PromptEnvVar('bad name; rm'),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+  });
+
+  group('envVarPrompts', () {
+    test(r'finds ${NAME} placeholders in headers, args and env', () {
+      var prompts = envVarPrompts({
+        'a': {
+          'headers': {'Authorization': r'Bearer ${EXAMPLE_TOKEN}'},
+          'args': [r'--key=${OTHER}', r'${EXAMPLE_TOKEN}'],
+        },
+        'b': {
+          'env': {'X': r'${THIRD}'},
+        },
+      });
+
+      expect(
+        [for (final p in prompts) p.name],
+        ['EXAMPLE_TOKEN', 'OTHER', 'THIRD'],
+      );
+    });
+
+    test('ignores plugin placeholders and plain text', () {
+      var prompts = envVarPrompts({
+        'a': {
+          'command': r'${CLAUDE_PLUGIN_ROOT}/run',
+          'args': [
+            r'${PLUGIN_ROOT}',
+            r'${PLUGIN_DATA}',
+            r'${CLAUDE_PLUGIN_DATA}',
+          ],
+          'env': {'X': r'$NOT_BRACED'},
+        },
+      });
+
+      expect(prompts, isEmpty);
+    });
+
+    test('is empty without MCP servers', () {
+      expect(envVarPrompts(null), isEmpty);
+    });
+  });
+
   test('PowerShell installer uses backslash paths and checks exit codes', () {
     var ps = renderPowerShellInstaller(_steps, title: 'demo');
 

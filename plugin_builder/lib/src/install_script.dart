@@ -38,6 +38,54 @@ final class CopyFiles extends InstallStep {
   final HomeDirectory destination;
 }
 
+/// Asks for the value of the environment variable [name] (a secret, so the
+/// input is not echoed) and saves it for the user: `~/.profile` in the shell
+/// script, the user environment in PowerShell.
+///
+/// Nothing is replaced: a variable that is already set, or already exported
+/// from `~/.profile`, is kept. With no terminal to ask on the step is skipped
+/// with a message.
+final class PromptEnvVar extends InstallStep {
+  PromptEnvVar(String name)
+    : assert(
+        RegExp(r'^[A-Za-z_][A-Za-z0-9_]*$').hasMatch(name),
+        'not an environment variable name: $name',
+      ),
+      name = name,
+      super('Set the $name environment variable');
+
+  final String name;
+}
+
+/// One [PromptEnvVar] per environment variable the MCP [servers] reference as
+/// `${NAME}`, in first-seen order. The plugin placeholders (`CLAUDE_PLUGIN_*`,
+/// `PLUGIN_ROOT`, `PLUGIN_DATA`) are expanded by the client, not asked for.
+List<PromptEnvVar> envVarPrompts(Map<String, dynamic>? servers) {
+  var names = <String>{};
+  void scan(Object? node) {
+    switch (node) {
+      case String():
+        for (var match in _placeholder.allMatches(node)) {
+          var name = match.group(1)!;
+          if (!name.startsWith('CLAUDE_PLUGIN_') &&
+              name != 'PLUGIN_ROOT' &&
+              name != 'PLUGIN_DATA') {
+            names.add(name);
+          }
+        }
+      case Map():
+        node.values.forEach(scan);
+      case List():
+        node.forEach(scan);
+    }
+  }
+
+  scan(servers);
+  return [for (final name in names) PromptEnvVar(name)];
+}
+
+final RegExp _placeholder = RegExp(r'\$\{([A-Za-z_][A-Za-z0-9_]*)\}');
+
 /// A directory under the user's home that an environment variable can
 /// relocate, e.g. `$CODEX_HOME/agents` defaulting to `~/.codex/agents`.
 final class HomeDirectory {
@@ -98,6 +146,8 @@ String renderShellInstaller(List<InstallStep> steps, {required String title}) {
                 if (arg == installRoot) r'"$here"' else _shArg(arg),
             ].join(' '),
           );
+      case PromptEnvVar():
+        out.writeln(_shPrompt.replaceAll('@NAME@', step.name));
       case CopyFiles():
         var destination = step.destination;
         out
@@ -169,6 +219,8 @@ String renderPowerShellInstaller(
             r'if ($LASTEXITCODE -ne 0) { '
             'throw "${step.executable} exited with \$LASTEXITCODE" }',
           );
+      case PromptEnvVar():
+        out.writeln(_psPrompt.replaceAll('@NAME@', step.name));
       case CopyFiles():
         var destination = step.destination;
         out
@@ -213,6 +265,46 @@ String renderPowerShellInstaller(
     ..writeln("Write-Host 'install: done.'");
   return out.toString();
 }
+
+const String _shPrompt = r'''
+profile="$HOME/.profile"
+value=
+if [ -n "${@NAME@:-}" ]; then
+  echo '@NAME@ is already set; keeping it'
+elif grep -qs '^export @NAME@=' "$profile"; then
+  echo "@NAME@ is already exported from $profile; keeping it"
+elif [ ! -t 0 ]; then
+  echo 'install: no terminal to ask for @NAME@ on; set it yourself' >&2
+else
+  printf 'Enter @NAME@: '
+  stty -echo
+  read -r value || true
+  stty echo
+  echo
+  if [ -z "$value" ]; then
+    echo '@NAME@ left unset: empty value'
+  else
+    escaped=$(printf '%s' "$value" | sed "s/'/'\\\\''/g")
+    printf "export @NAME@='%s'\n" "$escaped" >> "$profile"
+    echo "@NAME@ saved to $profile; restart your client to pick it up"
+  fi
+fi''';
+
+const String _psPrompt = r'''
+if ([Environment]::GetEnvironmentVariable('@NAME@')) {
+  Write-Host '@NAME@ is already set; keeping it'
+} elseif ([Console]::IsInputRedirected) {
+  Write-Warning 'install: no terminal to ask for @NAME@ on; set it yourself'
+} else {
+  $Secret = Read-Host 'Enter @NAME@' -AsSecureString
+  $Value = [System.Net.NetworkCredential]::new('', $Secret).Password
+  if ($Value) {
+    [Environment]::SetEnvironmentVariable('@NAME@', $Value, 'User')
+    Write-Host '@NAME@ saved to your user environment; restart your client to pick it up'
+  } else {
+    Write-Host '@NAME@ left unset: empty value'
+  }
+}''';
 
 /// [value] unquoted when it only has shell-safe characters, else quoted.
 String _shArg(String value) =>

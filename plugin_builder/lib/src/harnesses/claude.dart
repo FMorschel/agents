@@ -38,6 +38,7 @@ class ClaudeHarness implements Harness {
       _marketplace(options),
     );
     writeInstallScripts(context, [
+      ...envVarPrompts(servers),
       const RunCommand('Register the marketplace', 'claude', [
         'plugin',
         'marketplace',
