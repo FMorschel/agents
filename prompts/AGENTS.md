@@ -15,6 +15,8 @@ When writing small/quick scripts, write them in Dart and save them to `D:\dev\da
 - Before doing a task yourself, check whether an available agent (via the Agent tool) or skill is designed to do it. If one matches what the user is asking for, suggest using it instead of just doing the task directly yourself.
   - Example: the user says "fix this" without naming the actual problem. Before guessing or diving straight into a fix, check for agents/skills built for that step — e.g. a bug-hypothesis-former-style agent to turn symptoms/logs/repro steps into ranked hypotheses, and a bug-verifier-style agent to confirm which one is actually the root cause — and suggest those rather than immediately writing a fix on a guess.
 
+- Before spawning a subagent (Agent tool), starting a background task (`run_in_background`, Monitor) or waiting on a long-running command such as a full test suite, load the `spawn-subagents` skill: it covers the brief, shared-working-tree collisions and waiting without stuck background commands.
+
 ## Scope: minimum viable change (MVC)
 
 - Aim every change at the **minimum viable change**: the smallest change that makes the requested feature work or the bug go away, proven by tests. Before adding anything, ask: *would the request be unmet without this?*

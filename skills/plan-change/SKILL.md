@@ -5,7 +5,7 @@ description: "Use when the user wants a new feature or non-trivial change design
 
 ## Planning a change
 
-The orchestrator's `A`→`E` stages. This skill stops once a plan exists. To then build it, use `run-pipeline`.
+The orchestrator's `A`→`E` stages. This skill stops once a plan exists. To then build it, use `run-pipeline`. When spawning the stage agents, follow `spawn-subagents`.
 
 1. **`task-structurer`** turns the request into numbered FRs/NFRs, rough layer impact and the **MVC block** (Outcome, Done when, Touches, Budget, Out of scope). Load `minimum-viable-change`, `write-requirements`, and the project's own architecture doc (or `layered-architecture`).
 2. **`engineering-balance-critic`** on the requirements against the request. Overengineering findings get exactly one trim round back to `task-structurer`; if it keeps the item with a reason, it becomes a question for the user.

@@ -5,6 +5,8 @@ description: "Use when driving the `orchestrator` agent to run this repo's pipel
 
 ## Driving the orchestrator across phase boundaries
 
+For how to write the spawn brief and how to wait on runs without leaving stuck background commands, see `spawn-subagents`.
+
 `agents/orchestrator.md` documents this fully from the orchestrator's own point of view (see its "Plan persistence and phase boundaries" and "Resumability" sections) — but that text only gets read by the orchestrator subagent itself. Whoever *spawns* the orchestrator (you, right now) doesn't see that file unless they go look for it, so the halt/resume contract is easy to miss from the caller's side. This skill is that missing caller-side half.
 
 **The rule:** the orchestrator processes exactly one phase per invocation. When more phases remain, it stops and reports — it does **not** continue into the next phase in the same turn, and it does **not** expect to be resumed via `SendMessage`. It expects a **brand-new** `Agent` call.
