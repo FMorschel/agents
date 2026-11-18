@@ -1,6 +1,6 @@
 ---
 name: write-dart-tests
-description: "Use whenever you write or edit Dart/Flutter tests (`package:test`, `flutter_test`): file placement and naming, group/test structure, what makes an assertion meaningful, fakes vs. mocks, and the fail-first check. Also covers how to write up the axis sweep from `test-case-matrix.md`. Companion to `write-regression-test` for bug fixes."
+description: "Use whenever you write or edit Dart/Flutter tests (`package:test`, `flutter_test`): file placement and naming, group/test structure, what makes an assertion meaningful, fakes vs. mocks, dependency injection, controlling time/randomness/file system/HTTP/plugins/databases in tests, test data, and the fail-first check. Also covers how to write up the axis sweep from `test-case-matrix.md`. Companion to `write-regression-test` for bug fixes."
 ---
 
 ## Writing Dart tests
@@ -37,14 +37,34 @@ Before writing the first test, look at 2–3 existing test files next to the cod
 
 - Prefer a hand-written fake that implements the abstraction (`class FakeRepo implements Repo`) over a generated mock; fakes keep the test about behavior and survive refactors that change call order.
 - Use a mock only to verify an interaction that *is* the contract (a call that must happen exactly once, in a given order), and keep the number of stubbed calls small. Mocking is also the right tool for third-party surfaces you don't own — API/network calls, external package clients — where there's no in-repo abstraction to fake against.
+- Mock library: whichever the project already uses. With none, pick per case: `mocktail` (no codegen) for a few stubs, `mockito` (`@GenerateMocks`) when its generated, type-checked mocks pay for the build step.
 - Never mock the unit under test, and never mock away the logic the test claims to cover — a test whose every collaborator is stubbed and whose assertion restates the stub is tautological.
-- Inject dependencies through the constructor as abstractions (matches the layered architecture); do not reach for globals or `@visibleForTesting` seams unless the code already has them.
 
-### Time, randomness, IO
+### Dependency injection
 
-- Inject a clock / random source; never `DateTime.now()` inside a test's expectation. Prefer `package:clock` (`clock.now()`) over a hand-rolled clock abstraction, and use `withClock`/a fake `Clock` in tests to control it.
-- Use in-memory implementations or temp directories for IO, cleaned up in `tearDown`.
+Tests should construct the unit with its fakes directly, with no wrapper widget, provider scope or locator setup in between.
+
+- **Default:** constructor injection everywhere, with the abstraction as the parameter type. A service locator (`get_it`, read in widgets through `watch_it`) wires the real objects once at the app root; nothing below the root calls the locator, and tests never register into it.
+- **The project wins:** if it already injects some other way (provider, riverpod, a locator read deep in the tree), follow it rather than introducing a second style.
+- Do not reach for globals or `@visibleForTesting` seams unless the code already has them.
+
+### Time, randomness, IO and platform
+
+The packages named below are the user's pre-approved defaults for projects that have no equivalent yet: adding one as a dependency for this purpose needs no separate yes, but say so in the report. A project that already solves the problem another way keeps its way.
+
+- **Now:** never `DateTime.now()` inside a test's expectation. Use `package:clock` (`clock.now()`) in code and `withClock` / a fake `Clock` in tests.
+- **Timers, debounces, retries, delays:** `package:fake_async` (`fakeAsync((async) { …; async.elapse(const Duration(seconds: 5)); })`, combined with `withClock` when the code also reads the time); in widget tests, `tester.pump(duration)`. Never a real wait.
+- **Randomness:** usually assert the shape (length, format, uniqueness), not the value. When the test needs a specific value, inject a `Random` or an ID-generator abstraction and pass `Random(42)` or a fake returning fixed IDs.
+- **File system:** `package:file`. Production code takes a `FileSystem` (defaulting to `const LocalFileSystem()`), tests pass a `MemoryFileSystem` (`MemoryFileSystem.test(style: …)` when path style matters). A real temp directory only when the real OS behavior is the point, cleaned up in `tearDown`.
+- **HTTP:** layers above the data source get a hand-written fake repository. Only the data source's own tests fake the wire, with `package:http`'s `MockClient` (or the Dio equivalent) injected through the constructor.
+- **Plugins and platform APIs** (shared_preferences, path_provider, secure storage, `Platform.isX`, environment variables): wrap each behind a small project interface, injected through the constructor; tests pass a fake. Use `package:platform` (`LocalPlatform` / `FakePlatform`) for OS checks and environment, the way `package:file` covers disk.
+- **Local databases:** follow the project. With nothing in place, data-source tests run the real engine in memory (`sqflite_common_ffi` with `inMemoryDatabasePath`, drift's `NativeDatabase.memory()`) so SQL and migrations are exercised; layers above get a fake repository. Seeding from a data dump is fine when it holds no sensitive data; anything with real personal data must be anonymized first (`review-sensitive-data`).
 - **No network in unit tests.** If a test genuinely needs network (e.g. an integration test exercising a real client), it must never point at an official/production source — use a sandbox/staging endpoint, a local mock server, or a dedicated test account, never the real service.
+
+### Test data
+
+- **Builder functions** by default: one shared helpers file (match the repo's location, else `test/fixtures/`) with functions that have sensible defaults and named overrides, `aUser(name: 'Ana')`, so each test states only what matters to its case.
+- **JSON fixture files** for API-shaped data (a response body, a serialization round-trip), under `test/fixtures/`, decoded in the test.
 
 ### Flutter UI
 

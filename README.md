@@ -62,7 +62,7 @@ Other entry points:
 | --- | --- |
 | Process | `minimum-viable-change`, `run-pipeline`, `spawn-subagents`, `resolve-project-conventions`, `place-project-knowledge`, `compose-commits` |
 | Dart | `dart-edit-protocol`, `design-dart-class`, `edit-dart-class`, `comment-code`, `use-dart-analyzer` |
-| Flutter | `flutter-conventions` (index over widgets, state, rebuilds, controllers, navigation, theming, async UI), `review-flutter-async-and-disposal`, `review-flutter-visual-changes` (live-app before/after check, run by `flutter visual reviewer`), `document-app-navigation` (notes in `.agents/screens-navigation/` on how to reach a screen) |
+| Flutter | `flutter-conventions` (index over widgets, state, rebuilds, controllers, navigation, theming, async UI), `review-flutter-async-and-disposal`, `review-flutter-visual-changes` (live-app before/after check, run by `flutter visual reviewer`), `document-app-navigation` (notes in `.agents/screens-navigation/` on how to reach a screen), `catalog-flutter-widgets` (Widgetbook use case and `@Preview` for every new public widget, for size/text-scale/accessibility review) |
 | Architecture | `layered-architecture` |
 | Testing | `write-dart-tests` (with `test-case-matrix.md`), `write-flutter-ui-tests` (widget, golden, integration), `write-regression-test` |
 | Review (report-only, also run by the matching agents) | `review-test-adequacy` (what test cases are missing), `review-duplicate-code`, `review-dart-modernization`, `review-sensitive-data` |

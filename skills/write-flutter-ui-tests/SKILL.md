@@ -1,6 +1,6 @@
 ---
 name: write-flutter-ui-tests
-description: "Use when writing or editing Flutter widget tests, golden (screenshot) tests or integration tests: which of the three to pick, how to build the widget under test (theme, size, platform, dependency injection), finder and wait rules, golden determinism and update discipline, and how integration tests are structured. Extends `write-dart-tests` for UI code."
+description: "Use when writing or editing Flutter widget tests, golden (screenshot) tests or integration tests: which of the three to pick, how to build the widget under test (theme, size, platform, dependency injection), finder and wait rules, content/environment axes, accessibility guideline tests, golden determinism and update discipline, and how integration tests are structured. Extends `write-dart-tests` for UI code."
 ---
 
 ## Flutter UI tests
@@ -24,7 +24,7 @@ Logic that can be tested without a widget (a view model, a controller, a formatt
 - **Both sides of each condition**: shown and not shown, enabled and disabled, one case per value of an enum (a table of cases, so a failure names its row).
 - **Find by something stable**: `find.byKey`, `find.byType`, `find.byTooltip`, `find.byIcon`, and `find.text` for user-visible labels that are the contract. Avoid index finders (`.at(3)`) and private types.
 - **Interactions**: `tester.tap`, `enterText`, `drag`, then `pump()` for one frame, `pump(duration)` to step an animation. Use `pumpAndSettle()` only when you know it terminates; an infinite animation or progress indicator makes it time out, so pump explicit durations instead.
-- **Dependencies**: reset and register fakes or mocks in `setUp` (reset the service locator before registering). Prefer the project's hand-written in-memory fakes (such as a `*_mock.dart` repository) when they exist. Never touch the network, real storage or real platform channels. Use a mock only for third-party surfaces and for interactions that are the contract.
+- **Dependencies**: pump the widget with its fakes passed through its constructor (`write-dart-tests`, Dependency injection), so the test needs no locator setup or provider wrapper beyond the themed app helper. Only in a project whose widgets read a locator or provider themselves, follow it: reset the locator and register fakes in `setUp`. Prefer the project's hand-written in-memory fakes (such as a `*_mock.dart` repository) when they exist. Never touch the network, real storage or real platform channels. Use a mock only for third-party surfaces and for interactions that are the contract.
 - **Platform and theme variants**: set `debugDefaultTargetPlatformOverride` to test mobile vs. desktop behavior and **reset it in a `finally` or `addTearDown`** so it cannot leak into other tests. Test light and dark by pumping with the corresponding `ThemeData` / `themeMode`.
 - **Size**: set the surface explicitly (`tester.view.physicalSize` and `devicePixelRatio`, with `addTearDown(tester.view.reset)`) for any layout, overflow or responsive test. A layout test at the default 800x600 proves nothing about a phone.
 - **Overflow is a failure.** The framework reports it as an exception; fix the layout, do not catch the error. Add a narrow-size, long-text case for widgets that hold text.
@@ -43,6 +43,14 @@ The axis sweep from `skills/write-dart-tests/test-case-matrix.md` applies to wid
 - **Theme**: light and dark, when the widget picks colors itself rather than taking them from the theme.
 
 An axis the design never specifies (what RTL should look like, whether a name may wrap) is a question for the human, not an expected value to invent; same rule as the matrix's Scope boundary.
+
+### Accessibility
+
+Every new screen and public widget gets one accessibility test, and is also reviewed by eye through its Widgetbook entry and `@Preview` (`catalog-flutter-widgets`).
+
+- Assert the guidelines with a `SemanticsHandle` held for the test (`final handle = tester.ensureSemantics(); addTearDown(handle.dispose);`): `meetsGuideline(textContrastGuideline)`, `androidTapTargetGuideline`, `iOSTapTargetGuideline` and `labeledTapTargetGuideline`.
+- Icon-only buttons and meaningful images have a semantics label or tooltip, asserted with `find.bySemanticsLabel` or `find.byTooltip`.
+- Run the guideline test at text scale 2.0 too when the widget holds text: a tap target or label that only fails at large text is still a failure.
 
 ### Golden tests
 
