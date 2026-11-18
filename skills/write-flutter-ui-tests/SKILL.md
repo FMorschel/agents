@@ -67,6 +67,7 @@ Every new screen and public widget gets one accessibility test, and is also revi
 
 ### Integration tests
 
+- **Use `integration_test`** (the official package). Suggest `patrol` only when a flow genuinely needs what `integration_test` cannot do, such as native permission dialogs, notifications or the system share sheet, and then as a question for the user, never by adding it.
 - Live in `integration_test/`, one file per flow or screen group, named `*_test.dart`. Call `IntegrationTestWidgetsFlutterBinding.ensureInitialized()` in `main`.
 - **One app-initialization helper** in a shared utilities file (starts the app with seeded test data, such as profiles) plus shared step helpers for repeated sequences (log in, open the drawer, log out). Do not re-spell a multi-step sequence in each test.
 - **Reuse known routes.** `.agents/screens-navigation/` may already describe how to reach a screen (steps, finders, preconditions); turn that into a shared step helper instead of rediscovering it, and keep the note in sync with the helper.

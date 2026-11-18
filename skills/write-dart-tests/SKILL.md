@@ -13,7 +13,7 @@ Before writing the first test, look at 2–3 existing test files next to the cod
 
 ### File placement and naming
 
-- Mirror `lib/` under `test/`: `lib/src/foo/bar.dart` → `test/foo/bar_test.dart`.
+- Mirror `lib/src/`'s folders under `test/`: `lib/src/foo/bar.dart` → `test/foo/bar_test.dart`. This is the default; a project that already lays out its tests another way keeps its layout.
 - One test file per unit under test. Split a file only when the unit itself was split.
 - `test/src/` is reserved for testing infrastructure itself — reusable checkers/matchers, test simplification utilities, and similar cross-cutting test tooling — not test cases mirroring `lib/src/`.
 

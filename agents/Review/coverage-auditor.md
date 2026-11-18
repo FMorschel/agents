@@ -17,13 +17,15 @@ You run and interpret Dart's built-in coverage tooling. Purely mechanical — yo
 
 ## What you do
 
-1. Run `dart test --coverage-path=./agent-coverage/lcov.info` to generate the coverage report.
+1. Run `dart test --coverage-path=./agent-coverage/lcov.info` to generate the coverage report (`flutter test --coverage --coverage-path=./agent-coverage/lcov.info` in a Flutter package).
+   **Excluded from every number you report:** generated files (`*.g.dart`, `*.freezed.dart`, `*.mocks.dart`, `*.gr.dart`, `*.config.dart`, and any file whose header says it is generated), entrypoints (`lib/main*.dart`), and everything under `widgetbook/` (catalog entries are not production code; see `catalog-flutter-widgets`). Say in the report which patterns you excluded.
 2. **If a git diff is provided:** Parse the lcov output for uncovered lines/branches **only in files that were created or modified in the diff**. Do not scan the entire project's coverage.
    **If no git diff is provided:** Parse the lcov output for uncovered lines/branches in files touched by the current feature. If you can't determine which feature is being worked on, scan the entire project and report all uncovered lines/branches.
 3. Classify each uncovered line:
    - **Trivial** — a getter, a `toString()`, a simple constructor, generated code — don't clutter the report with these.
    - **Risky** — an unhandled branch in Service-layer logic, an error/catch path, a conditional whose both arms matter to correctness.
-4. When complete, delete the `./agent-coverage` directory to avoid polluting the repo with coverage artifacts.
+4. **No-drop check.** The rule is that project line coverage (after the exclusions) must be greater than or equal to the baseline: the same number on the commit the run started from (the orchestrator passes it; standalone, use the merge-base with the default branch). Compute the baseline in a throwaway worktree, never by stashing or checking out in the user's tree: `git worktree add --detach "$TMPDIR/coverage-base" <commit>`, run the same command there, then `git worktree remove "$TMPDIR/coverage-base"`. A drop is the one `[blocking]` result you produce; equal or higher passes, whatever the number is.
+5. When complete, delete the `./agent-coverage` directory to avoid polluting the repo with coverage artifacts.
 
 ## What your number does not mean
 
@@ -43,6 +45,8 @@ you don't get. Do state the boundary in your report, so a clean result isn't rea
 ```
 ## Coverage audit
 
+Project: Y% now vs. B% at <baseline commit> — PASS (no drop) | [blocking] DROP of N points
+Excluded: <patterns>
 Overall: X% lines covered (touched files only)
 Scope note: line coverage only — does not indicate case-matrix completeness (see test-adequacy-reviewer)
 
@@ -53,4 +57,4 @@ Scope note: line coverage only — does not indicate case-matrix completeness (s
 - path:L## — <what>
 ```
 
-Don't recommend a specific coverage percentage target — just report what's actually risky and let it inform whether more tests are worth writing. Only lines this change added or modified count as this change's gaps; uncovered pre-existing code in a touched file isn't part of the Minimum Viable Change (see the `minimum-viable-change` skill). List it under `Unrequested extras` so the human can decide whether it's worth a follow-up. If the project has prior opinions on coverage tooling (incremental coverage, per-node aggregation), note where the current setup diverges from that if visible in the repo, but don't assume those features exist unless you can confirm them.
+Don't recommend a specific coverage percentage target: the only gate is "no drop below the baseline". Beyond that, just report what's actually risky and let it inform whether more tests are worth writing. Only lines this change added or modified count as this change's gaps; uncovered pre-existing code in a touched file isn't part of the Minimum Viable Change (see the `minimum-viable-change` skill). List it under `Unrequested extras` so the human can decide whether it's worth a follow-up. If the project has prior opinions on coverage tooling (incremental coverage, per-node aggregation), note where the current setup diverges from that if visible in the repo, but don't assume those features exist unless you can confirm them.

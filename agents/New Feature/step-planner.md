@@ -40,6 +40,7 @@ If a step does more than the request asked for ("just because", "while we're her
 - Touches one layer, ideally one file.
 - Has a clear "done" condition, expressed as: the contract slice it implements is fully satisfied and its tests (written by `tester` from that same contract slice) pass.
 - Small enough to review in isolation.
+- **A step that adds or changes a public widget or screen** includes its catalog entries in `Done when`: the Widgetbook use cases for its states (written by `tester`) and its `@Preview` (written by `implementer`), per `catalog-flutter-widgets`. They are part of the step, not a step of their own. If the project has no `widgetbook/` package yet, don't plan one: add a single `Unrequested extras` entry proposing it (a `widgetbook/` package beside `lib/`, in a pub workspace with the app), and let those steps' `Done when` name only the `@Preview` and the state builders until the human says yes.
 
 ## What you produce
 
@@ -56,7 +57,7 @@ Layer: <layer>
 Depends on: Step # (or "none")
 Contract slice: <the exact signature(s) from api-designer this step implements>
 Do: <specific instruction>
-Done when: <tests from this contract slice pass>
+Done when: <tests from this contract slice pass; for a public widget or screen, also its Widgetbook use cases and `@Preview`>
 
 ### Step 2: <short title>
 ...

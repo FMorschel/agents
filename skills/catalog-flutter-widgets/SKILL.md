@@ -14,7 +14,7 @@ So a new public widget without its use cases has a test gap, the same way it wou
 
 ### Who writes it
 
-- **Widgetbook use cases** live in the Widgetbook app or package, outside `lib/`, and count as test files: `tester` (or `test-writer` when backfilling) writes them, together with the widget's tests and from the same state builders.
+- **Widgetbook use cases** live in the `widgetbook/` package, outside `lib/`, and count as test files: `tester` (or `test-writer` when backfilling) writes them, together with the widget's tests and from the same state builders.
 - **`@Preview` functions** sit in `lib/` next to the widget, so they are production code: `implementer` writes them.
 
 ### Which widgets get an entry
@@ -22,9 +22,32 @@ So a new public widget without its use cases has a test gap, the same way it wou
 - **Every new public widget and every new screen**, and an existing one whose public constructor or look changed.
 - **Not private helper widgets** (`_Foo`) inside a screen or widget file; they are covered through their parent's entry. Do not make a widget public just to catalog it.
 
+### Where Widgetbook lives
+
+All Widgetbook files go in a `widgetbook/` package beside `lib/` (at the app package's root), never inside `lib/` or `test/`, and that package is part of a **pub workspace** with the app (Dart 3.6+):
+
+```yaml
+# pubspec.yaml (the app)
+workspace:
+  - widgetbook
+dev_dependencies:
+  app_widgetbook: any        # tests import the shared state builders from here
+
+# widgetbook/pubspec.yaml
+name: app_widgetbook
+resolution: workspace
+dependencies:
+  app: any                   # the widgets under review
+  widgetbook: …
+```
+
+The app depending on `app_widgetbook` as a dev dependency while `app_widgetbook` depends on the app is a cycle pub resolves inside a workspace (checked: `pub get` succeeds and a test in the app imports a builder from `app_widgetbook`). A workspace member's SDK constraint and shared dependency versions must agree with the root's. If the project already keeps Widgetbook somewhere else, follow it and do not move it unasked.
+
+Within the package, follow the project's existing setup (annotation style `@widgetbook.UseCase` vs. a manual tree, naming); with nothing to copy, mirror `lib/`'s folders and keep the state builders in `widgetbook/lib/src/states/`, separate from the use cases that wrap them.
+
 ### Widgetbook use case
 
-Follow the project's existing Widgetbook setup (folder, annotation style `@widgetbook.UseCase` vs. a manual tree, naming). Each entry:
+Each entry:
 
 - **One use case per meaningful state**: default, empty, loading, error, disabled, long content (a 200-character name, a single unbroken 60-character word). The same states the widget's tests and goldens cover.
 - **Knobs** for the constructor parameters a reviewer would want to vary (text, enabled, counts), with realistic defaults.
@@ -35,7 +58,7 @@ Follow the project's existing Widgetbook setup (folder, annotation style `@widge
 
 The states in the catalog and the states under test must be the same states, built by the same code, so they cannot drift apart.
 
-- Each use case's widget comes from a plain builder function (`Widget buildUserCardLongName()`, using the builder-function test data from `write-dart-tests`) in a place both the Widgetbook package and the tests can import, matching the repo's layout (for example a shared `*_fixtures`/`testing` package or library). The use case wraps it with knobs; the tests pump it directly.
+- Each use case's widget comes from a plain builder function (`Widget buildUserCardLongName()`, using the builder-function test data from `write-dart-tests`) in `widgetbook/lib/src/states/`, which the app's tests import through the `app_widgetbook` dev dependency (see Where Widgetbook lives). The use case wraps it with knobs; the tests pump it directly.
 - Widget tests assert behavior on those states, golden tests pin their look, and the accessibility guideline test runs over each of them (`write-flutter-ui-tests`).
 - **Widgetbook Cloud**, when the project uses it, already snapshots every use case per addon combination and asks for review on the PR. Follow its review flow: an unexplained snapshot difference is a regression, the same rule as a failing golden. Do not duplicate in local goldens what Cloud already pins, unless the project keeps both deliberately. Never set it up unasked (it is an external service).
 
@@ -50,7 +73,7 @@ Add an `@Preview` from `package:flutter/widget_previews.dart` alongside each Wid
 
 ### When the project has no Widgetbook yet
 
-Do not scaffold a Widgetbook app unasked: it is a new package and a new app target. Propose the setup once (where it would live, which addons), and until the user says yes, add only the `@Preview` (when the Flutter version supports it) and list the missing Widgetbook entries in the report. Still write the state builders, so the tests use them now and the use cases can wrap them later.
+Do not scaffold a Widgetbook app unasked: it is a new package, a new app target and a workspace change to the root `pubspec.yaml`. Propose the setup once (the `widgetbook/` workspace package above, and which addons), and until the user says yes, add only the `@Preview` (when the Flutter version supports it) and list the missing Widgetbook entries in the report. Still write the state builders, in the test helpers the repo already uses, so the tests use them now; moving them into `widgetbook/lib/src/states/` is part of the setup.
 
 ### Before reporting done
 
