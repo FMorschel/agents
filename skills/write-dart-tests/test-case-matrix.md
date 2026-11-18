@@ -35,16 +35,59 @@ format in the `write-dart-tests` skill), not argued one by one.
    result here?" If the answer is no, it's N/A — don't invent a config arm.
 6. **Negatives** — a "does nothing / throws / declines" case for each applicable axis *whose
    negative behaves differently* from the others. Not one per axis by default; one per distinct
-   failure path.
+   failure path. Pin the **error contract**, not just "it failed": the exception type (or error
+   code) and a stable part of the message, whether it surfaces as a synchronous throw or a failed
+   `Future`/`Stream`, and that state is left unchanged afterwards (`expect(() => f(''),
+   throwsA(isA<FormatException>()))`, then the balance is still 100 — not `throwsA(anything)`).
+
+### Conditional axes (only when the unit's types or behavior call for them)
+
+Each of these applies only to a unit with that kind of input or behavior; for everything else it
+goes on the `N/A:` line. An axis the contract is silent about is still reported to `gap-finder`,
+never given an invented expected value (see Scope boundary).
+
+7. **Text input: malformed and hostile strings** — for a unit that parses, validates, formats or
+   forwards a `String`. Pick the classes the unit could plausibly treat differently:
+   whitespace-only; leading/trailing whitespace; very long; control characters, newlines, null
+   bytes; Unicode (combining marks, emoji and surrogate pairs — is `'👩‍👩‍👧'` 1 character or 5? —
+   zero-width and right-to-left characters, lookalike quotes); strings that look like another
+   type (`'1e5'`, `'0x10'`, `'../etc'`, `'null'`, `'NaN'`); case and locale quirks (`'İ'`).
+   Expected outcome per class: accepted, normalized, or rejected with the unit's error contract —
+   never an unrelated exception from deeper in the stack. Several classes that resolve to the same
+   outcome are one case with one representative, not one test each.
+   `parseUsername(String)` today gets `''` and `'bad name'`; this axis adds `'   '`, `'a\u0000b'`,
+   the emoji family, and a 10,000-character string.
+8. **Numeric boundaries** — for a unit that takes or returns numbers: 0, -1, the limits of any
+   documented range and one step either side, `int` overflow (and VM vs. web, where `int` differs),
+   `NaN`, infinities, `-0.0`, division by zero, rounding direction at `.5`.
+   `percent(int part, int total)` gets `(1, 2)` today; this adds `(0, 0)`, `(1, -2)` and
+   `(maxInt, 1)`.
+9. **Time and date** — for a unit that does calendar or clock arithmetic: DST gaps and overlaps,
+   leap day, month/year rollover (`Jan 31` + 1 month), UTC vs. local, `DateTime` with and without
+   a zone, and an injected clock instead of `DateTime.now()` so the test is deterministic.
+10. **Idempotency and round-trip** — a property check that needs no per-case expected value:
+    `f(f(x)) == f(x)` for normalizers and formatters, and `decode(encode(x)) == x` for every
+    inverse pair, including `x` with null optionals and empty collections.
+11. **Input mutation and aliasing** — the unit leaves its arguments unchanged, does not hand back
+    the caller's own collection or its internal one, and later changes to an argument do not leak
+    into a stored result. `sorted(xs)` called with `[3, 1, 2]` leaves `xs` as `[3, 1, 2]`; a
+    getter returning the internal list lets `x.items.add(…)` corrupt state.
+12. **Async and concurrency** — for an `async` unit or one holding state across calls: two
+    overlapping calls, out-of-order completion (`search('a')` finishing after `search('ab')`),
+    cancel or dispose mid-flight, a failure on the second step of a sequence, a stream that errors
+    or closes early, and a repeated call while one is still pending.
+13. **Scale** — for a unit that loops or recurses over its input: empty, one, a large size (10⁵
+    elements, a very long string), and deep nesting (a 10,000-deep nested list into a recursive
+    `flatten`). Assert it completes and returns the right result, not a wall-clock time.
 
 ### Extra axes for code-transforming work (analyzer plugins, lints, fixes, assists, codegen)
 
 Skip this section entirely unless the unit reads or rewrites source code.
 
-7. **Nesting, generated both directions** — for any two constructs that can each contain the
-   other, write A-in-B *and* B-in-A.
-8. **Collision and formatting survival** — generated identifiers colliding with existing ones;
-   multi-line input, trailing commas and existing whitespace surviving the operation intact.
+14. **Nesting, generated both directions** — for any two constructs that can each contain the
+    other, write A-in-B *and* B-in-A.
+15. **Collision and formatting survival** — generated identifiers colliding with existing ones;
+    multi-line input, trailing commas and existing whitespace surviving the operation intact.
 
 ## Two questions that restructure the work
 

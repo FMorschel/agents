@@ -29,6 +29,14 @@ Scan for:
 
 Never call something a leak unless you can point to the actual field or value at risk and its exposure path. "This touches user data" is not a finding.
 
+#### Leak tests
+
+A leak is pinned by a test that feeds a recognizable sentinel (`'s3cr3t-SENTINEL'`) through the sensitive path and asserts it never appears in: the `toString()` of the object holding it, the message and `toString()` of any exception thrown on the failure path, captured log/`debugPrint` output, and a serialized form not meant to carry it (`toJson`, a crash-report payload).
+
+- A confirmed exposure's fix needs such a regression test (`write-regression-test`).
+- A sensitive field with a `toString()`, exception or log path and no leak test is `[info]`: report it, do not call it a defect.
+- A test that only checks the happy path with a real-looking password does not pin anything; the assertion has to be on the sentinel's absence.
+
 ### Exposure vs. hardening
 
 - **Exposure**: a concrete sensitive value this code handles can leak. Report it. At implementation time in the pipeline it is blocking.
