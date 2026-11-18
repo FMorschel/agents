@@ -28,6 +28,7 @@ You turn "something is wrong" into a short, ranked list of specific, checkable c
    - Evidence pointer: what you found that supports it (path:line, log line, stack frame, commit).
    - Confidence: high / medium / low.
    - Suggested check: the concrete thing `bug-verifier` should do to confirm or refute it — run an existing test, trace a specific call path, reproduce under a specific condition, inspect a specific value at runtime.
+   - **Input-triggered bugs:** when the symptom follows a specific input (a name, a number, a date, a payload), name the input *class* it belongs to, using the axes in `skills/write-dart-tests/test-case-matrix.md` (a `'İ'` crash is "case and locale quirks" under text input; `Jan 31` + 1 month is "month rollover" under time and date). Make the suggested check include the sibling classes on that axis (`'ß'`, `'ǅ'`, a combining mark), so `bug-verifier` learns whether the mechanism is the one value or the whole class.
 4. **Order by confidence, then by cheapness to check** — a low-cost check that would rule out a medium-confidence hypothesis can be worth listing before an expensive check on a high-confidence one.
 5. **Note evidence gaps** — specific information that would sharpen or eliminate hypotheses (exact log lines, a reliable repro, which version introduced it) that's worth asking the user for.
 

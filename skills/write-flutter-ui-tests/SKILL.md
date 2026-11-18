@@ -31,6 +31,19 @@ Logic that can be tested without a widget (a view model, a controller, a formatt
 - **Dispose** every controller, focus node and stream you create, in `addTearDown`.
 - **Async**: `await` every `pump` / `tap`; never leave a `Future` un-awaited (`review-flutter-async-and-disposal`).
 
+### Content and environment axes
+
+The axis sweep from `skills/write-dart-tests/test-case-matrix.md` applies to widgets too, but for UI its text axis (7) is about what the content does to the layout, and the environment is an axis of its own. Like the matrix, this is a menu: a widget earns a case only when it shows text, takes input or changes layout on that axis.
+
+- **Long and unbroken text** in every slot that shows external data: a 200-character name, a single 60-character word with no spaces (a URL, an email), in a narrow surface. Expect ellipsis, wrapping or scrolling as the design says; never an overflow error.
+- **Text scale**: pump with `MediaQuery(data: MediaQueryData(textScaler: TextScaler.linear(2.0)), …)` (or the app's wrapper) for screens with dense text or fixed-height rows. A 200-character name in a `ListTile` at 2.0 must not overflow.
+- **Right-to-left**: wrap in `Directionality(textDirection: TextDirection.rtl)` (or pump with an RTL locale) when the widget positions things with `left`/`right` or `EdgeInsets.only(left: …)` instead of directional `start`/`end` values; assert the leading icon ends up on the right.
+- **Text input content**: for a `TextField`/`TextFormField`, `enterText` with whitespace-only text, emoji and combining characters (`'👩‍👩‍👧'`, `'é'` as `e` + U+0301), and text over `maxLength`; assert the counter, the validator message and the value the callback receives.
+- **Empty, loading and error states** for any widget fed by async or optional data, each with its own case (and its own golden, when one exists).
+- **Theme**: light and dark, when the widget picks colors itself rather than taking them from the theme.
+
+An axis the design never specifies (what RTL should look like, whether a name may wrap) is a question for the human, not an expected value to invent; same rule as the matrix's Scope boundary.
+
 ### Golden tests
 
 - A golden pins appearance. Use it for components and screens whose look is a requirement; do not golden-test every widget.

@@ -22,6 +22,9 @@ You define exactly what becomes visible across each layer boundary — the *shap
 3. Specify signatures precisely enough that `tester` can write real tests from them and `implementer` never has to invent a name or type on the fly.
 4. Note which layer each symbol lives on, and confirm it doesn't require a layer to skip past the one beneath it (check `architecture.md` for this project's actual layer names/boundaries — infer from directory structure if no doc exists).
 5. Flag any signature that touches model purity (a domain model gaining a framework-typed field, etc.) as a concern rather than silently designing around it.
+6. **State input handling for each new public parameter whose type has a conditional axis** in `skills/write-dart-tests/test-case-matrix.md` (axes 7–13: text, numbers, dates, collections that may be mutated, async callers). One `Input:` line says what the member does with the values that axis lists: accepted as-is, normalized (how), or rejected (with which exception from `Throws`). Without it, `tester` and `gap-finder` will report every such parameter as contract-silent.
+   - Describe the behavior the FRs already imply. If they imply none, the plain answer is `not validated; caller's responsibility` (or `passed through unchanged`). Adding validation or a new exception the FRs never asked for is an `Unrequested extra`, not something to put on this line.
+   - Example: `User parseUsername(String raw)` — `Input: trimmed; empty or whitespace-only throws FormatException; length counted in code points, max 32.`
 
 ## Ground rules
 
@@ -49,6 +52,7 @@ No new API changes needed. The existing API surface already covers all FRs/NFRs.
 ### <Layer> — <AbstractionName>
 - FR-#: `ReturnType methodName(ParamType param, ...)`
   Throws: <exception types, if any>
+  Input: <per parameter with a conditional axis: accepted / normalized (how) / rejected (which exception)>
   Notes: <one line — why this shape, if not obvious>
 
 ### New abstractions (if any)
