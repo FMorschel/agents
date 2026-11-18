@@ -24,6 +24,15 @@ Before writing the first test, look at 2–3 existing test files next to the cod
 - Use `setUp` for state that every test in the group needs and that is cheap to rebuild. Avoid sharing mutable state between tests through a top-level variable that is not reset in `setUp`.
 - Every unit test is independent and order-insensitive. If a unit test needs another test to have run first, it is wrong. This doesn't apply to integration tests, where a deliberate ordered sequence of steps against a real/live system is often the point.
 
+### Tags
+
+- **When to tag:** in a project that already uses tags, or one with no tests yet, tag new tests as below. In a project that has tests but no tags, ask the user before introducing them; until they agree, don't tag.
+- **Two kinds of tags, no others:**
+  - **Feature** (`checkout`, `auth`): for a feature whose tests span folders (data source, repository, service, widgets), so `dart test -t checkout` runs all of it.
+  - **Test type**, for speed: `slow` (over about a second), `golden`, `db`. Agents' inner loop may run `dart test -x slow -x golden`; the full suite still runs before anything is reported done (`dart-edit-protocol`).
+  - **No layer tags.** Test folders mirror `lib/src/`, so `dart test test/data/` already selects a layer.
+- **Declare every tag** in `dart_test.yaml` (`tags: { checkout: {}, slow: {} }`), so a misspelled tag is reported instead of silently matching nothing. Put the tag on the file (`@Tags(['checkout'])` before `library;`) when every test in it shares it, on a `group`/`test` (`tags: ['slow']`) otherwise.
+
 ### Assertions that actually pin behavior
 
 - Assert the **specific expected value**, never mere presence: `expect(page.items, [10, 11, 12])`, not `expect(page.items, isNotEmpty)`; `expect(result, isNotNull)` is only right when non-null is the whole contract.

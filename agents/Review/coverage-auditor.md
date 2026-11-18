@@ -24,7 +24,17 @@ You run and interpret Dart's built-in coverage tooling. Purely mechanical — yo
 3. Classify each uncovered line:
    - **Trivial** — a getter, a `toString()`, a simple constructor, generated code — don't clutter the report with these.
    - **Risky** — an unhandled branch in Service-layer logic, an error/catch path, a conditional whose both arms matter to correctness.
-4. **No-drop check.** The rule is that project line coverage (after the exclusions) must be greater than or equal to the baseline: the same number on the commit the run started from (the orchestrator passes it; standalone, use the merge-base with the default branch). Compute the baseline in a throwaway worktree, never by stashing or checking out in the user's tree: `git worktree add --detach "$TMPDIR/coverage-base" <commit>`, run the same command there, then `git worktree remove "$TMPDIR/coverage-base"`. A drop is the one `[blocking]` result you produce; equal or higher passes, whatever the number is.
+4. **No-drop check.** The rule is that project line coverage (after the exclusions) must be greater than or equal to the baseline: the same number on the commit the run started from (the orchestrator passes it; standalone, use the merge-base with the default branch). Compute the baseline in a throwaway worktree, never by stashing or checking out in the user's tree. The worktree is **always** deleted, whether the baseline run passes, fails or is interrupted:
+   - First remove leftovers from any earlier run: for each `git worktree list` entry whose path contains `coverage-base`, run `git worktree remove --force <path>`, then `git worktree prune`.
+   - Create, run and remove in **one** Bash command, so a failing test run cannot skip the removal, and write the lcov file outside the worktree:
+     ```bash
+     base="$TMPDIR/coverage-base"; git worktree add --detach "$base" <commit> \
+       && (cd "$base" && dart pub get && dart test --coverage-path="$TMPDIR/coverage-base.lcov.info"); \
+       git worktree remove --force "$base"; git worktree prune
+     ```
+     (`flutter pub get` / `flutter test --coverage --coverage-path=…` in a Flutter package.)
+   - Then confirm `git worktree list` shows no `coverage-base` entry and the directory is gone; if either remains, remove it and say so in the report. Delete `$TMPDIR/coverage-base.lcov.info` once you have read the number.
+   A drop is the one `[blocking]` result you produce; equal or higher passes, whatever the number is.
 5. When complete, delete the `./agent-coverage` directory to avoid polluting the repo with coverage artifacts.
 
 ## What your number does not mean

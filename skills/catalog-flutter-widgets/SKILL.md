@@ -17,9 +17,15 @@ So a new public widget without its use cases has a test gap, the same way it wou
 - **Widgetbook use cases** live in the `widgetbook/` package, outside `lib/`, and count as test files: `tester` (or `test-writer` when backfilling) writes them, together with the widget's tests and from the same state builders.
 - **`@Preview` functions** sit in `lib/` next to the widget, so they are production code: `implementer` writes them.
 
+### When this applies
+
+- **The project uses Widgetbook** when one of its packages (normally `widgetbook/`) lists `widgetbook` in its `dependencies`. Only then are use cases required, and only then is a missing one a gap.
+- **Without that dependency**, `@Preview` still applies; Widgetbook use cases do not. The setup is proposed once (see "When the project has no Widgetbook yet"), never added, and nothing is reported as missing per widget.
+- **Only the current change counts.** Required entries are those for widgets the current change adds or changes. Existing widgets without entries are never a finding, including right after Widgetbook is added: that change warns only about the widgets it touches. A backfill of the rest is at most one `Unrequested extras` line.
+
 ### Which widgets get an entry
 
-- **Every new public widget and every new screen**, and an existing one whose public constructor or look changed.
+- **Every new public widget and every new screen**, and an existing one whose public constructor or look changed, in the current change.
 - **Not private helper widgets** (`_Foo`) inside a screen or widget file; they are covered through their parent's entry. Do not make a widget public just to catalog it.
 
 ### Where Widgetbook lives
