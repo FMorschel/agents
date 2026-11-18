@@ -1,11 +1,21 @@
 ---
 name: catalog-flutter-widgets
-description: "Use whenever you add or change a public Flutter widget or screen, or when asked about Widgetbook, widget catalogs or the Flutter Widget Previewer (`@Preview`). Every new public widget and screen gets a Widgetbook use case and an `@Preview`, so it can be reviewed, accessibility included, at different sizes, text scales, themes and text directions. Says what each entry covers, where it goes, and what to do when the project has no Widgetbook yet."
+description: "Use whenever you add or change a public Flutter widget or screen, write or review its UI tests, or are asked about Widgetbook, widget catalogs or the Flutter Widget Previewer (`@Preview`). Every new public widget and screen gets a Widgetbook use case and an `@Preview`: they are part of its test coverage (shared state builders for widget, golden and accessibility tests; visual regression where Widgetbook Cloud is set up) and let it be reviewed, accessibility included, at different sizes, text scales, themes and text directions. Says what each entry covers, who writes it, where it goes, and what to do when the project has no Widgetbook yet."
 ---
 
 ## Cataloging Flutter widgets
 
-The point is **review**: a human (or `flutter visual reviewer`) can look at a widget in isolation and check its layout and accessibility at different sizes and text scales without navigating the app to reach it. It complements tests, it does not replace them: automated accessibility guideline tests still live in `write-flutter-ui-tests`.
+A Widgetbook entry is **part of a widget's tests**, not documentation next to them. It does two jobs:
+
+- **Testing.** Its use cases are the widget's named states, built once and reused by the widget, golden and accessibility tests (see "Use cases as test fixtures"). Where the project runs Widgetbook Cloud, each use case is snapshotted across the addon combinations on every PR, which is visual regression testing at a breadth hand-written goldens rarely reach.
+- **Review.** A human (or `flutter visual reviewer`) can look at the widget in isolation and check its layout and accessibility at different sizes and text scales without navigating the app to reach it.
+
+So a new public widget without its use cases has a test gap, the same way it would without a widget test. Automated accessibility guideline tests still live in `write-flutter-ui-tests`; the catalog adds the cases a guideline test cannot judge (does it still read well at 2.0, in RTL, on a small phone).
+
+### Who writes it
+
+- **Widgetbook use cases** live in the Widgetbook app or package, outside `lib/`, and count as test files: `tester` (or `test-writer` when backfilling) writes them, together with the widget's tests and from the same state builders.
+- **`@Preview` functions** sit in `lib/` next to the widget, so they are production code: `implementer` writes them.
 
 ### Which widgets get an entry
 
@@ -21,17 +31,26 @@ Follow the project's existing Widgetbook setup (folder, annotation style `@widge
 - **Addons** (configured once in the Widgetbook app, not per use case): device/viewport sizes from a small phone to desktop, text scale (at least 1.0, 1.5 and 2.0), light and dark theme, and a left-to-right and a right-to-left locale. A use case that only renders correctly at one of these is a finding for review, not something to hide by locking the addon.
 - **Fakes, not real services**: the widget gets its dependencies through its constructor (see `write-dart-tests`, Dependency injection), so the use case passes fakes or builder-function data. Never point a use case at a real backend or real personal data.
 
+### Use cases as test fixtures
+
+The states in the catalog and the states under test must be the same states, built by the same code, so they cannot drift apart.
+
+- Each use case's widget comes from a plain builder function (`Widget buildUserCardLongName()`, using the builder-function test data from `write-dart-tests`) in a place both the Widgetbook package and the tests can import, matching the repo's layout (for example a shared `*_fixtures`/`testing` package or library). The use case wraps it with knobs; the tests pump it directly.
+- Widget tests assert behavior on those states, golden tests pin their look, and the accessibility guideline test runs over each of them (`write-flutter-ui-tests`).
+- **Widgetbook Cloud**, when the project uses it, already snapshots every use case per addon combination and asks for review on the PR. Follow its review flow: an unexplained snapshot difference is a regression, the same rule as a failing golden. Do not duplicate in local goldens what Cloud already pins, unless the project keeps both deliberately. Never set it up unasked (it is an external service).
+
 ### `@Preview` (Flutter Widget Previewer)
 
 Add an `@Preview` from `package:flutter/widget_previews.dart` alongside each Widgetbook use case, for the widget's default state at least:
 
 - On a top-level (or static) function with no parameters that returns the widget, built with the same fakes as the Widgetbook use case. Put it in the widget's file or the project's preview location, matching what the repo already does.
+- Build it from the same state builder as the Widgetbook use case and the tests.
 - Use the annotation's parameters the installed Flutter version supports (`name`, `size`, `textScaleFactor`, `brightness`, a wrapper for theme or localization) to show the variants a reviewer needs most, at minimum a larger text scale.
 - Check that the project's Flutter version ships `widget_previews.dart` before adding one. If it does not, skip `@Preview` and say so in the report instead of upgrading Flutter.
 
 ### When the project has no Widgetbook yet
 
-Do not scaffold a Widgetbook app unasked: it is a new package and a new app target. Propose the setup once (where it would live, which addons), and until the user says yes, add only the `@Preview` (when the Flutter version supports it) and list the missing Widgetbook entries in the report.
+Do not scaffold a Widgetbook app unasked: it is a new package and a new app target. Propose the setup once (where it would live, which addons), and until the user says yes, add only the `@Preview` (when the Flutter version supports it) and list the missing Widgetbook entries in the report. Still write the state builders, so the tests use them now and the use cases can wrap them later.
 
 ### Before reporting done
 

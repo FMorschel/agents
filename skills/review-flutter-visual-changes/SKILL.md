@@ -10,6 +10,7 @@ Code review cannot tell you what a screen looks like. This skill produces eviden
 ### 0. Preconditions
 
 - The app must run in debug mode and be reachable over DTD (`find-dtd-uri`, then `dtd` `connect`). If there is no running app, ask for a DTD URI or launch the app as the user's instructions allow; if you can only review statically, say so in the report.
+- When the changed widgets have Widgetbook use cases (`catalog-flutter-widgets`), the Widgetbook app is a second target: run it the same way, and use its addons to sweep size, text scale, theme and direction for each state without navigating the real app. The same baseline/after rules apply. It does not replace checking at least one real screen that renders the widget.
 - Register the project roots with `roots` first.
 - Identify the **target screens**: every screen that renders a changed widget, not just the one the author named. Use `lsp`/grep to find the changed widgets' usages. When a shared widget changed, every screen using it is a target (list them; sample the ones that differ most).
 
@@ -63,7 +64,7 @@ Typing: `enter_text` needs the app's `main` to start with `enableFlutterDriverEx
 
 ### 5. Test coverage of the change
 
-State whether the change is guarded: a widget test for behavior and a golden test for appearance where the look must stay stable (rules in `write-flutter-ui-tests`). Run the existing tests that touch the changed widgets (`flutter test <paths>`; there is no MCP tool for it) and report failures verbatim. A golden that fails after an *unintended* difference is a finding; do not update goldens to make it pass. Use `flutter test --update-goldens` only for differences you confirmed are intended, and list which goldens changed.
+State whether the change is guarded: a widget test for behavior, a golden test for appearance where the look must stay stable (rules in `write-flutter-ui-tests`), and, for a new or changed public widget or screen, Widgetbook use cases for its states plus an `@Preview` (`catalog-flutter-widgets`); a missing one is reported like a missing test. Where the project runs Widgetbook Cloud, an unexplained snapshot difference is a finding, the same as a failing golden. Run the existing tests that touch the changed widgets (`flutter test <paths>`; there is no MCP tool for it) and report failures verbatim. A golden that fails after an *unintended* difference is a finding; do not update goldens to make it pass. Use `flutter test --update-goldens` only for differences you confirmed are intended, and list which goldens changed.
 
 ### 6. Report
 

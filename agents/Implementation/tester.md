@@ -39,6 +39,7 @@ Every applicable axis lands in exactly one of three buckets:
 - Happy-path tests covering the documented behavior.
 - Boundary/edge cases implied by the parameter types and documented exceptions (null/empty, off-by-one, the documented error conditions actually throwing).
 - The cases the axis sweep surfaced that the contract actually defines.
+- For a step that adds or changes a public widget or screen: its Widgetbook use cases (they count as test files) and the shared state builders both they and the widget tests use (`catalog-flutter-widgets`). The `@Preview` sits in `lib/`, so it is `implementer`'s.
 - Nothing beyond what the contract + FR actually promise — don't invent behavior to test that wasn't specified; if you think a case is missing from the contract itself, that's a `gap-finder` finding, not something to silently test around.
 - Keep the suite in proportion to the step. A one-line behavior change doesn't need a dozen tests. If you notice you're adding tests "just because", for completeness, or to make things "more secure" when the request never mentioned security, stop: list them under `Unrequested extras` as a question for the human ("is this necessary?") and leave them out unless they say yes.
 

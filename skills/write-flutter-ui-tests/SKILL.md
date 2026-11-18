@@ -14,11 +14,13 @@ Read `write-dart-tests` first; it covers file placement, naming, assertions and 
 | A widget shows/hides/enables something, reacts to a tap, calls a callback | **Widget test** (`testWidgets`) | default choice; fast, no device |
 | A widget's *look* must not drift (layout, color, spacing, theme variants) | **Golden test** (`matchesGoldenFile`) | in addition to behavior assertions, never instead of them |
 | A flow crosses screens, routing, real DI, storage or the backend | **Integration test** (`integration_test`) | slow; only for flows, never for single-widget logic |
+| A new public widget or screen, at every size, text scale, theme and direction | **Widgetbook use case** (+ `@Preview`) | always, for every new public widget; its state builders feed the tests above (`catalog-flutter-widgets`) |
 
 Logic that can be tested without a widget (a view model, a controller, a formatter) belongs in a plain unit test. Do not pump a widget to test a function.
 
 ### Widget tests
 
+- **Pump the catalog's states.** When the widget has Widgetbook use cases, pump the same state builders they wrap instead of re-assembling the widget in the test (`catalog-flutter-widgets`, Use cases as test fixtures). A state you need that the catalog lacks is added to both.
 - **Build the smallest tree that works.** Wrap the widget in `MaterialApp` (or the app's own themed wrapper) and a `Scaffold`; add providers and navigator keys only when the widget needs them. Put the wrapper in one `_buildApp` / `_pump` helper in the file so each test states only what varies.
 - **Names state the behavior and the condition**, in the language and pattern the neighboring tests use (for example `DEVE exibir X QUANDO Y` / `NÃO DEVE ... QUANDO ...` when that is the repo's style).
 - **Both sides of each condition**: shown and not shown, enabled and disabled, one case per value of an enum (a table of cases, so a failure names its row).
@@ -55,6 +57,7 @@ Every new screen and public widget gets one accessibility test, and is also revi
 ### Golden tests
 
 - A golden pins appearance. Use it for components and screens whose look is a requirement; do not golden-test every widget.
+- **Widgetbook Cloud** snapshots, where the project runs them, are goldens too: an unexplained difference is a regression, and an intended one is approved deliberately, never to turn the check green. Don't duplicate in local goldens what Cloud already pins, unless the project keeps both on purpose.
 - **Determinism first.** Fixed size and pixel ratio, fixed theme, fixed data (no `DateTime.now()`, random values or network images), fixed text scale, the same fonts. Animations must be finished or stopped on a known frame. A golden that differs between machines is a bug in the test: fix the cause, do not loosen the comparison. Agree with the repo on which platform generates the goldens.
 - **Assert on the widget's finder**, not the whole screen, so unrelated changes do not break it: `await expectLater(find.byType(Foo), matchesGoldenFile('goldens/foo_dark.png'))`. Wrap in a `RepaintBoundary` when the finder does not isolate the widget.
 - **One golden per meaningful variant**: light/dark, mobile/desktop width, and key states (empty, error, long text). Name the file after the variant (`foo_empty_dark.png`). Generate variants from a table of cases rather than copy-pasting.
@@ -75,4 +78,4 @@ Every new screen and public widget gets one accessibility test, and is also revi
 
 ### Before reporting done
 
-Run the new tests and their neighbors with `flutter test <paths>` (there is no MCP tool for it), then follow `dart-edit-protocol` for fix, format and analyze. A UI test you have not run is a draft. For appearance changes also run `review-flutter-visual-changes`.
+Run the new tests and their neighbors with `flutter test <paths>` (there is no MCP tool for it), then follow `dart-edit-protocol` for fix, format and analyze. A UI test you have not run is a draft. A new public widget or screen is not covered until its Widgetbook use cases and `@Preview` exist and build (`catalog-flutter-widgets`). For appearance changes also run `review-flutter-visual-changes`.
