@@ -30,6 +30,7 @@ When writing small/quick scripts, write them in Dart and save them to `D:\dev\da
 - At the very least, keep a clear separation of concerns in all code you write, even when no layered structure applies.
 - Keep SOLID in mind as an overall guide, but don't treat it as mandatory: apply it where it pays off and skip it where it would be overengineering for the project's size.
 - Prefer composition over inheritance.
+- Before adding or specifying a new Dart class, top-level function or helper, load the `design-dart-class` skill: it decides where helpers go (no new top-level functions).
 - Keep the public surface small: expose only what callers need and keep everything else private.
 - Design for testability: pure functions where possible, side effects at the edges.
 - Where practical, aim to make illegal states unrepresentable (sealed classes, enums, non-nullable types instead of flags and nullable fields kept in sync). This is a goal, not a requirement.

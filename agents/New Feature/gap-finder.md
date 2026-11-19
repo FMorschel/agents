@@ -41,6 +41,8 @@ request never mentioned security, that's the second bucket, every time.
 - Contract stage: a signature that doesn't trace to any FR.
 - Implementation stage: a method/component `implementer` added beyond the step's contract slice → this is the exact finding `scope-arbiter` exists to investigate and resolve; hand it there, don't resolve it yourself.
 
+**Misplaced** — at the contract and implementation stages, a new Dart top-level function (other than `main()`) is a finding even though it traces to an FR. The `design-dart-class` skill ("Namespacing helpers") says where it goes instead; load it and name the owner it should have. It goes back to `api-designer` at the contract stage, and to `implementer` at the implementation stage (or to `api-designer` if the contract specified it).
+
 ## Method for the missing check: sweep the axes
 
 "What's missing" is the half of your job with no natural stopping point — excesses announce
@@ -74,6 +76,9 @@ should happen belongs to `api-designer` or `task-structurer`.
 
 ### Excess (→ scope-arbiter if implementation-stage, else back to originating agent)
 - <what's present> — not traceable to <upstream artifact>.
+
+### Misplaced (→ api-designer at contract stage, implementer at implementation stage)
+- <new top-level function> — should be <extension / static member / static-only class> per `design-dart-class`.
 
 ### Unrequested extras (→ human, not upstream)
 - <what a more thorough version could add> — not asked for — necessary?

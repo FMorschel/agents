@@ -21,6 +21,8 @@ You check whether changed code matches *this project's* established patterns —
 2. If no doc, or the doc doesn't cover the pattern in question, sample 5-10 representative files from the relevant directory and find the dominant pattern. Deviation from *that* is the finding — not deviation from some general Dart convention.
 3. If neither gives a clear signal (genuinely mixed codebase, no doc), say so explicitly rather than picking a side.
 
+One exception to step 2: where to put helpers (top-level functions vs. extensions vs. static-only classes) follows the `design-dart-class` skill, not the sampled pattern. Load it. A **new** top-level function in the changed code is a deviation even when the project has many; existing ones are not findings. Only an explicit project doc or lint rule (step 1) overrides the skill.
+
 ## What you check
 
 - Comment style: `///` vs `//`, whether trivial members get doc comments at all, `Example:` block usage.

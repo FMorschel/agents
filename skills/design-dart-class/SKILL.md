@@ -1,6 +1,6 @@
 ---
 name: design-dart-class
-description: "Use when creating a Dart class or deciding how to shape it: primary constructors (Dart 3.13+), field vs. `late` field vs. getter, setter vs. method, mutability, equality, class kind/openness, constructors, visibility, helper placement and naming. Companion to `edit-dart-class`, which governs member ordering and layout."
+description: "Use when creating a Dart class or deciding how to shape it, and whenever you add or specify a new top-level function or helper in Dart (where it goes instead: an extension or a static-only class): primary constructors (Dart 3.13+), field vs. `late` field vs. getter, setter vs. method, mutability, equality, class kind/openness, constructors, visibility, helper placement and naming. Companion to `edit-dart-class`, which governs member ordering and layout."
 ---
 
 ## Designing a Dart class
@@ -115,10 +115,39 @@ void add(Item item) {
 
 ### Namespacing helpers: extension, static class, top-level function
 
-- Behavior that belongs to one specific type: an **extension** on that type — it's intrinsically related to it.
-- Otherwise, helpers with no natural owner: a **static-only class** (it gives a namespace) rather than loose top-level functions.
+Don't add new top-level functions. Place each one by this order:
 
-Static-only classes are allowed. If the project already uses them, follow suit freely. If it doesn't use any yet, don't introduce the pattern on your own initiative — but this section counts as the "stated elsewhere" that permits it, so use one when helpers genuinely need a namespace. Only an explicit rule in the project's own docs or lint config that forbids them overrides this; in that case follow the project and mention the mismatch.
+- Behavior that belongs to one specific type: an **extension** on that type — it's intrinsically related to it.
+- Behavior that belongs to an existing class or enum (it reads or configures what that type owns): a **static member** of that type.
+- Otherwise, helpers with no natural owner: a **static-only class** (`abstract final class`), which gives them a namespace.
+
+```dart
+// Before: loose top-level functions
+String clip(String text, {int max = 80}) { ... }
+void applyDefaultLogLevels() { ... }
+
+log.detail(() => 'query ${clip(query)}');
+applyDefaultLogLevels();
+
+// After: clip belongs to String, the level defaults belong to the logger registry
+extension ClipText on String {
+  String clip({int max = 80}) { ... }
+}
+
+enum AppLog {
+  ...
+  static void applyDefaultLevels() { ... }
+}
+
+log.detail(() => 'query ${query.clip()}');
+AppLog.applyDefaultLevels();
+```
+
+`main()` is exempt, as is anything a framework or tool requires to be top-level.
+
+This applies to **new** code even when the project already has many top-level functions: an inferred project pattern (sampled files) doesn't override it. Existing top-level functions stay unless the user asks for a migration; when you touch one, mention that it could move, but don't move it unasked. Only an explicit rule in the project's own docs or lint config that forbids extensions or static-only classes overrides this section; in that case follow the project and mention the mismatch.
+
+When you write a contract or plan, the same rule applies to the signatures you specify: a contract that lists a new top-level function is the mistake this section prevents.
 
 ### Class scope
 
