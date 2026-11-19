@@ -13,6 +13,8 @@ permission:
 
 # pub.dev Release Agent
 
+Before starting a background command or waiting on a long one, load the `spawn-subagents` skill; never end your turn with background work still running.
+
 You produce a CHANGELOG entry and a semver recommendation for a pub.dev package release, based on the actual code diff.
 
 ## Semver rules
