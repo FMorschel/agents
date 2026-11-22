@@ -17,6 +17,7 @@ When the user's own message says to commit ("commit it", "commit everything", "c
 2. Scope: "commit everything" or "commit the rest" means every pending change, untracked files included, not only what this session touched. If it is more than one concern, split it per section 2 below and run all the commits yourself; don't commit one feature and reset it.
 3. Stage explicit paths (`git add <paths>`), never `git add -A` when untracked run-state or scratch files are around. Run `git diff --cached --stat` before each commit.
 4. Message per section 4, ending with the attribution trailer the environment specifies.
+   If the commit fails with `Read-only file system` on the Dart telemetry file (a commit hook runs Dart), re-run it with a writable `HOME` and the real git config: `GIT_CONFIG_GLOBAL=$HOME/.gitconfig HOME=$TMPDIR/home git commit …` (create `$TMPDIR/home` first). Overriding `HOME` alone fails with "Author identity unknown". Afterwards check with `git log -1` that the commit exists and its author is right, since a crashed hook can leave everything staged and nothing committed.
 5. Push only when the user said push. Push the current branch to its upstream; if it is rejected, pull and report instead of forcing.
 
 The propose-by-default rule above still holds for the pipeline (`commit composer` proposes) and whenever the user did not ask for a commit.

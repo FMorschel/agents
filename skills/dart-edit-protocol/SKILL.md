@@ -62,6 +62,8 @@ mkdir -p $TMPDIR/home && HOME=$TMPDIR/home dart run script.dart
 
 If pub also needs its cache, set `PUB_CACHE` to a folder under `$TMPDIR` too, or let the command run once with the sandbox disabled when the user approves. A `dart` that is too old for the command is a different problem (`use-home-dart`).
 
+The override also hides `~/.gitconfig`: a `git commit` whose hook runs Dart needs `GIT_CONFIG_GLOBAL=$HOME/.gitconfig` as well (see `compose-commits`).
+
 ### Adding dependencies
 
 When several packages are needed, add them in **one** `pub add` call (mix runtime and dev with the `dev:` prefix, e.g. `dart pub add dio dev:build_runner`), so pub solves them together. Never one call per package.
