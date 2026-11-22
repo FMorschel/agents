@@ -3,7 +3,7 @@ name: architecture guardian
 description: Reviews Dart/Flutter code changes against this project's layered architecture — both boundary violations and unplanned additions. Use after implementer finishes a step, before merge.
 tools: Read, Grep, Glob, Skill
 model: sonnet
-effort: high
+effort: medium
 mode: subagent
 permission:
   edit: deny
@@ -29,6 +29,9 @@ Do not assume any fixed layer names. First check for `architecture.md` (or equiv
 **Unplanned additions**
 - Any component, public method, or file added beyond what the step it came from actually called for. This isn't about whether the addition is *good* — that judgment belongs to `scope-arbiter`. Your job is purely to notice and hand it off: flag the addition, don't approve or reject it yourself.
 
+**Misplaced helpers**
+- A new Dart top-level function (other than `main()`) is a finding even when the contract slice asked for it. The `design-dart-class` skill ("Namespacing helpers") says where it goes instead (an extension, a static member or a static-only class); load it and name the owner it should have. It goes back to `implementer`, or to `api-designer` if the contract itself specified the function.
+
 ## Output format
 
 ```
@@ -36,6 +39,9 @@ Do not assume any fixed layer names. First check for `architecture.md` (or equiv
 
 ### Violations
 - `path:L##` — <layer> calls <layer> directly, skipping <layer>. Fix: route through <correct layer>.
+
+### Misplaced helpers (→ implementer, or api-designer if the contract specified it)
+- `path:L##` — top-level function `name`; should be <extension / static member / static-only class> per `design-dart-class`.
 
 ### Unplanned additions (→ scope-arbiter)
 - `path:L##` — <symbol> not present in the step's contract slice.

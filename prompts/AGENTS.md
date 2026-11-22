@@ -17,6 +17,10 @@ When writing small/quick scripts, write them in Dart and save them to `D:\dev\da
 
 - Before spawning a subagent (Agent tool), starting a background task (`run_in_background`, Monitor) or waiting on a long-running command such as a full test suite, load the `spawn-subagents` skill: it covers the brief, shared-working-tree collisions and waiting without stuck background commands.
 
+- When something took a long time to figure out and the answer would help next time, load the `suggest-new-skills` skill: it decides whether a skill is worth suggesting, whether it is global or belongs to the current project, and asks me to confirm before anything is created.
+
+- Before asking me to run a command and paste its output, load `run-host-commands-yourself`: run it yourself unless it needs my credentials or a physical action.
+
 ## Scope: minimum viable change (MVC)
 
 - Aim every change at the **minimum viable change**: the smallest change that makes the requested feature work or the bug go away, proven by tests. Before adding anything, ask: *would the request be unmet without this?*
@@ -44,6 +48,8 @@ When writing small/quick scripts, write them in Dart and save them to `D:\dev\da
 - Whenever you get or think of a suggestion for a new test (from a reviewer, an adequacy pass, your own sweep, or a "missing test cases" list), **add it** — don't leave it as an "unrequested extra" to ask about. I can remove tests later; more tests is always better than fewer. This applies even when the test is for a branch that was only ported or already existed. It does not extend to production-code changes: a test that needs a behavior change in production code is still an extra to ask about.
 
 ## Reviewer findings and "extras"
+
+- To decide what to do with each reviewer finding (fix now, ask, or refactor), load the `triage-reviewer-findings` skill. The rules below are what it applies.
 
 - When a reviewer, smell detector, memory-safety pass or similar — or your own finding while implementing — flags a real defect or robustness gap (unhandled async errors, leaked subscriptions/resources on a failure path, null-bang that can throw, missing disposal, background work with no owner that outlives a failed or disposed start, error swallowed), **fix it right away** with a regression test, in the same change. Don't park it as an "unrequested extra" to ask about.
 - "Extras" are reserved for things that **change behavior** or widen scope (new features, changed semantics, different UX, new dependencies, API reshaping). Those still need my yes.
