@@ -51,6 +51,16 @@ Mixed content gets split. "Repositories here cache for five minutes; to add one,
 - **Rules about a kind of task live in that task's skill.** Even a rule that must always apply (question 1) goes in the skill for that kind of task when one exists, such as "no new top-level functions" in `design-dart-class`. AGENTS.md then gets one line saying when to load the skill ("before adding a Dart class or helper, load `design-dart-class`"). Pipeline agents load skills, not AGENTS.md, so a rule written only in AGENTS.md never reaches them. A plain rule in AGENTS.md is for preferences no skill covers, such as diagram format.
 - **Specs and docs stay separate.** They are written differently: a spec states intent for one change, while a doc describes the current system. Neither is ever converted into the other. When a feature ships, its spec stays in `specs/` as the record of what was asked for and planned. Then update `docs/`, in its own descriptive voice, to reflect what now exists.
 
+### Before you write a rule: look for its skill
+
+When the user says "add a rule to AGENTS.md" (or a prompt file, or a project's agents.md), do not write it there first. `grep -rn "<topic keywords>" skills/` and check the skill list for one that covers that kind of task. If one fits, the rule goes in that skill and AGENTS.md gets at most a one-line pointer saying when to load it. A plain rule in AGENTS.md is only for a preference no skill covers and that is too small for one. Then tell the user, in a short list, where each rule landed.
+
+### After you change a rule, name or path: propagate it
+
+A rule, skill name, folder or file name rarely lives in one file. Before editing, grep the whole repo for the old name or the topic (`skills/`, `agents/`, `prompts/`, `README.md`, the orchestrator, `plugin.config.json`, and the installed copy under `~/.claude/` when it is not a symlink). List every file that mentions it, update each, then re-run the grep and confirm no stale reference remains. When you say you are done, list the files you touched.
+
+A **new skill** needs the same pass: it only takes effect where something points to it. After creating one, grep for the agents, skills, README sections and AGENTS.md lines that cover the same kind of task, wire each one in, and show the list of wiring edits before committing.
+
 ### Signs that something is in the wrong place
 
 - **In AGENTS.md:** a multi-step procedure, a rule that only matters for some tasks, or a fact about the code's structure. Move it to a skill or to `docs/`.

@@ -1,6 +1,6 @@
 ---
 name: compose-commits
-description: "Use when splitting a completed piece of work into commits for a human reviewer: grouping by logical concern (pipeline stages by default), hunk-level splitting inside a single file, matching the project's commit message convention, and the propose-by-default / execute-only-when-told rule. Used by `commit composer` at the end of the pipeline."
+description: "Use when splitting a completed piece of work into commits for a human reviewer: grouping by logical concern (pipeline stages by default), hunk-level splitting inside a single file, matching the project's commit message convention, and the propose-by-default / execute-only-when-told rule, and the direct path when the user says "commit" or "commit and push". Used by `commit composer` at the end of the pipeline."
 ---
 
 ## Composing commits
@@ -8,6 +8,18 @@ description: "Use when splitting a completed piece of work into commits for a hu
 The goal is commits a reviewer wants to read: grouped by *logical concern*, each one understandable and (ideally) building on its own. Not one commit per file, not one giant commit.
 
 **Propose by default.** Creating commits (`git add`, `git commit`) is an explicit-permission action: do it only when the orchestrator or the human explicitly says to execute, even in autonomous mode. Never push, amend, rebase, or rewrite history unless told. Never commit `agents/.run-state/` files (working state, gitignored) or coverage artifacts.
+
+### Direct path: the user says "commit" or "commit and push"
+
+When the user's own message says to commit ("commit it", "commit everything", "commit and push"), that is the explicit go-ahead: don't propose first, and don't call `commit composer` for it. Use this path:
+
+1. `git fetch`, then `git status -sb` and the ahead/behind counts against the upstream, so you know the branch and whether it is in sync. Commit on the current branch when the project's AGENTS.md says direct commits are fine (this repo: directly on `main`, no feature branch); otherwise stop and ask.
+2. Scope: "commit everything" or "commit the rest" means every pending change, untracked files included, not only what this session touched. If it is more than one concern, split it per section 2 below and run all the commits yourself; don't commit one feature and reset it.
+3. Stage explicit paths (`git add <paths>`), never `git add -A` when untracked run-state or scratch files are around. Run `git diff --cached --stat` before each commit.
+4. Message per section 4, ending with the attribution trailer the environment specifies.
+5. Push only when the user said push. Push the current branch to its upstream; if it is rejected, pull and report instead of forcing.
+
+The propose-by-default rule above still holds for the pipeline (`commit composer` proposes) and whenever the user did not ask for a commit.
 
 ### 1. Read what actually changed
 

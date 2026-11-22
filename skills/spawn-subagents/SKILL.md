@@ -20,11 +20,13 @@ A spawned agent starts cold. Put in the brief everything it can't derive:
 
 Match the agent to the job: a `tester` for tests only, an `implementer` for production code against existing tests, an `orchestrator` for a multi-step pipeline. Don't use an orchestrator for a single small fix.
 
-**Always paste the waiting rules into the brief.** A spawned agent only follows this skill if it loads it, and nothing forces that. So every brief you write (orchestrator, tester, implementer, reviewers) must end with this block, verbatim, and must tell the agent to load this skill first:
+**Paste the waiting rules into the brief of every agent that has the Bash tool** (orchestrator, tester, implementer, test-writer, coverage-auditor, the bug-hunt agents, api-doc-writer, commit-composer, pubdev-release-agent, flutter-visual-reviewer). A spawned agent only follows this skill if it loads it, and nothing forces that. So end the brief with this block, verbatim. It is the whole instruction: do not also tell the agent to load this skill, since the block already carries the rules and loading the skill would pay for them twice:
 
-> Load the `spawn-subagents` skill first. Waiting rules: no `until grep`/`until pgrep` polling loops; use a foreground command when you will wait anyway, or `run_in_background` and wait for its exit notification, or `Monitor` with a hard bound (`timeout 1800 bash -c '...'`) on a process exiting or a file existing, never on matching output text. A `timeout` that kills a run leaves any output-matching waiter hanging forever. One waiter per run; stop the previous run and its waiter before re-running. Before you report, `TaskStop` every background command you started that is still running.
+> Waiting rules: no `until grep`/`until pgrep` polling loops; use a foreground command when you will wait anyway, or `run_in_background` and wait for its exit notification, or `Monitor` with a hard bound (`timeout 1800 bash -c '...'`) on a process exiting or a file existing, never on matching output text. A `timeout` that kills a run leaves any output-matching waiter hanging forever. One waiter per run; stop the previous run and its waiter before re-running. Before you report, `TaskStop` every background command you started that is still running.
 
-This applies to the orchestrator too: when it spawns agents, it copies the block into their briefs.
+**Leave the block out for agents without Bash** (every reviewer with `Read, Grep, Glob, Skill`, `task-structurer`, `api-designer`, `step-planner`, `gap-finder`, `scope-arbiter`, and so on): they cannot start background commands, so the rules cannot apply to them.
+
+This applies to the orchestrator too: when it spawns agents, it copies the block into the briefs of those that have Bash.
 
 ### Several agents in one working tree
 
@@ -43,6 +45,13 @@ A background command started with `run_in_background` notifies you when it exits
 - **One waiter per run.** If you re-run something, stop the previous run and its waiter first. Never stack waiters for runs you have replaced.
 - **Before you report, stop every background command you started** (`TaskStop`) that is still running. A report with orphaned watchers leaves them running for hours.
 - A foreground command is better than a background one when you will wait on it anyway and it fits the timeout.
+
+### While an agent is still running
+
+- **Interim notices are not results.** An agent that stops while its own background commands are still running sends a notice like "waiting on its own background work". That is not its report. Don't act on it, don't respawn, don't answer each one: wait for the final hand-back. If many such notices pile up, send one `SendMessage` nudge (find the agent with `ListAgents`) before considering a replacement.
+- **Answer "still running? what is it doing?" with evidence**: `ListAgents`, then recently modified files (`find <dir> -mmin -30`) and `git status`, and say what is running and what looks stale.
+- **A read-only agent can't write files.** Check the agent's tool list before briefing it: `task-structurer`, `api-designer`, `step-planner` and most reviewers have no `Write` or `Edit`. Ask them for the full file text in the report and persist it yourself; never ask them to edit a file.
+- **A failed or rate-limited agent** is resumed from its run-state and `git status`, see `run-pipeline` ("When a run fails instead of halting").
 
 ### After the agent reports
 

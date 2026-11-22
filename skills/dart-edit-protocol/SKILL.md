@@ -43,6 +43,25 @@ The Dart MCP server's analysis and pub tools act on registered roots; with none 
 - Step 5 runs the full suite, not just your file. While iterating, a project with test-type tags may exclude them (`dart test -x slow -x golden`, see `write-dart-tests`, Tags), but the last run before reporting done includes every tag. Prefer failures-only output (`dart test -r failures-only`) to keep it readable and you should mostly not need tail.
 - Restart the loop from step 1 after *any* edit made to resolve a diagnostic or a failure; each edit can create new ones.
 
+### Before reporting done: the closing gates
+
+Run these once, at the end, after the loop above is clean:
+
+- **Full suite, zero skips, zero failures.** A known bug is a failing regression test that gets fixed in the same change, never a `skip:` marker. If a phase or step is closing and skipped tests exist, fix them or say plainly that the phase is not done. A flaky test is fixed or reported, never ignored.
+- **Build the app, when the project has one.** For a Flutter app with a desktop target, run `flutter build linux --debug` on Linux (the matching target elsewhere) after analyze and tests pass, and report the result. Skip it only for packages and logic-only changes with no app target.
+- **Run long commands once, to a file.** Send the full-suite and build output to a file in `$TMPDIR` (`flutter test -r failures-only > $TMPDIR/full.txt`), wait for the command to exit (foreground when it fits the timeout, otherwise `run_in_background` and its exit notification, see `spawn-subagents`), then read the failures once (`grep "\[E\]"`). Don't poll the file with repeated `tail`.
+- **Say what you skipped.** The first lines of the report list every gate you did not run (reviews, build, a tag excluded from the suite) and every requirement still unmet. "Done" means none of those exist; otherwise say "not done" and why, before anything else.
+
+### Running Dart inside the sandbox
+
+`dart run script.dart` (and `dart <script>`) fails in the sandbox with a read-only error on the Dart telemetry/config file under `~`. Don't retry variations. Point `HOME` at a writable folder for that one command, which works the first time:
+
+```bash
+mkdir -p $TMPDIR/home && HOME=$TMPDIR/home dart run script.dart
+```
+
+If pub also needs its cache, set `PUB_CACHE` to a folder under `$TMPDIR` too, or let the command run once with the sandbox disabled when the user approves. A `dart` that is too old for the command is a different problem (`use-home-dart`).
+
 ### Adding dependencies
 
 When several packages are needed, add them in **one** `pub add` call (mix runtime and dev with the `dev:` prefix, e.g. `dart pub add dio dev:build_runner`), so pub solves them together. Never one call per package.
