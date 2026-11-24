@@ -25,14 +25,19 @@ Find *semantic* duplication: not the literal matches the linter catches, but "th
 
 ### Scope
 
-New code duplicating *existing* code is worth reporting (the author could have reused it). Consolidating existing code the change did not otherwise touch is not part of the Minimum Viable Change (`minimum-viable-change`): in the pipeline mark it `outside diff` so `scope arbiter` turns it into a question. In a standalone request about a named target, everything in the target is in scope; still mark pairs that cross the target's edge.
+New code duplicating *existing* code is worth reporting (the author could have reused it). For existing code the change did not otherwise touch, tell the two cases apart:
+
+- **Related to the task**: the task needs logic that an existing function already does (or nearly does). The right move is to extract a shared helper and migrate the existing case to it too. That refactor is part of the task and needs no question; mark it `related to the task`.
+- **Unrelated**: consolidating existing code the task does not need is not part of the Minimum Viable Change (`minimum-viable-change`): in the pipeline mark it `outside diff` so `scope arbiter` turns it into a question.
+
+In a standalone request about a named target, everything in the target is in scope; still mark pairs that cross the target's edge.
 
 ### Output
 
 ```
 ## Duplication found (light / full)
 
-- path/A.dart:L## ~ path/B.dart:L## — <what's duplicated> [within diff | outside diff]
+- path/A.dart:L## ~ path/B.dart:L## — <what's duplicated> [within diff | related to the task | outside diff]
   Suggested consolidation: <one line — new shared method, parameterize existing one, reuse existing helper>
 ```
 
