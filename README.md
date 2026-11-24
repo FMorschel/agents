@@ -46,7 +46,7 @@ graph LR
 
 - **Per-step review gates:** architecture-guardian, test-adequacy-reviewer, convention-agent, plus code-smell-detector, memory-safety-agent, duplicate-code-detector and sql-safety-agent when the diff calls for them.
 - **End-of-feature passes:** dart-modernization-agent, coverage-auditor, sensitive-data-agent.
-- **Cross-cutting:** gap-finder at every handoff, scope-arbiter for excess findings, engineering-balance-critic as a non-blocking counterpoint.
+- **Cross-cutting:** gap-finder at the requirements, contract and test handoffs, scope-arbiter for excess findings, engineering-balance-critic as a non-blocking counterpoint.
 
 Other entry points:
 
@@ -60,9 +60,12 @@ Other entry points:
 
 | Area | Skills |
 | --- | --- |
-| Process | `minimum-viable-change`, `run-pipeline`, `spawn-subagents`, `resolve-project-conventions`, `place-project-knowledge`, `compose-commits` |
+| Process | `minimum-viable-change`, `run-pipeline`, `spawn-subagents`, `resolve-project-conventions`, `place-project-knowledge`, `compose-commits`, `suggest-new-skills` (asks before creating a global or project skill when something took long to figure out), `route-pipeline-cases` (reference files the orchestrator reads on demand) |
 | Dart | `dart-edit-protocol`, `design-dart-class`, `edit-dart-class`, `comment-code`, `use-dart-analyzer` |
 | Flutter | `flutter-conventions` (index over widgets, state, rebuilds, controllers, navigation, theming, async UI), `review-flutter-async-and-disposal`, `review-flutter-visual-changes` (live-app before/after check, run by `flutter visual reviewer`), `document-app-navigation` (notes in `.agents/screens-navigation/` on how to reach a screen), `catalog-flutter-widgets` (Widgetbook use cases and `@Preview` for every new public widget: shared test states, visual regression, and size/text-scale/accessibility review) |
+| Workflow | `triage-reviewer-findings`, `run-host-commands-yourself`, `restart-desktop-app` (Linux and Windows), `diagnose-slow-operations-with-logs`, `review-working-tree-changes`, `read-web-source-in-full`, `write-repo-independent-shareable-docs` |
+| Plans | `record-owner-decisions`, `reconcile-plan-set-consistency`, `execute-plan-phase`, `report-milestone-progress` |
+| UI surface | `check-ui-surface` (the `ui surface agent`'s procedure), `sweep-app-for-ui-pattern` (every instance of a pattern across the app) |
 | Architecture | `layered-architecture` |
 | Testing | `write-dart-tests` (with `test-case-matrix.md`), `write-flutter-ui-tests` (widget, golden, integration), `write-regression-test` |
 | Review (report-only, also run by the matching agents) | `review-test-adequacy` (what test cases are missing), `review-duplicate-code`, `review-dart-modernization`, `review-sensitive-data` |

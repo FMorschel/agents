@@ -35,6 +35,16 @@ This mirrors what orchestrator.md already commits to doing on its own at a genui
 3. On a "plan just produced" or phase-boundary halt: spawn a **new** `orchestrator` agent (not the same one, not via `SendMessage`) using the "resume, one phase only" template, naming the run-id. Do not restate the original task from scratch — the point of the run-state file is that the new instance reconstructs context from it, not from you re-deriving the plan.
 4. Repeat step 2–3 until the report says `O` (done) or stops for a reason that needs a human.
 
+### When a run fails instead of halting
+
+A run can also die mid-step without reaching a phase boundary: a rate or usage limit, an API error, a killed process. The final message is then an error, not a report, and the user usually says "try again" or "continue". A failed run is not a halted one, so the rule above does not apply to it:
+
+1. Read the state before doing anything: `agents/.run-state/<run-id>.md` (which node and step were in progress) and `specs/plans/<run-id>.md`, then `git status` and `git diff --stat` for the partial edits the dead run left in `lib/` and `test/`.
+2. If the agent is still addressable (a failed task can still be reached with `SendMessage`), resume that same agent with a message that says what is already done and which step is left. Otherwise spawn a **fresh** orchestrator with the "resume" template, scoped to the unfinished step only, and tell it which files hold partial edits so it finishes them instead of redoing them.
+3. Tell the user what finished, what did not, and what you are resuming from, even when the cause is a usage limit that will reset later. Don't re-run a stage the state file records as done.
+
+When the user asks for one orchestrator per milestone (a plan per milestone), spawn them one at a time, each planning-only with a run-id-stamped plan file, and record which milestones are blocked on owner answers so they are not started early.
+
 ### Why not just SendMessage the same agent
 
 `SendMessage` keeps the halted orchestrator's in-memory context alive and just nudges it forward. That works for the lighter human-gated checkpoints (step 2's second bullet), but a genuine `PB` halt is a *structural* stop, not a pause waiting for input — the orchestrator's own spec is written assuming the next phase is picked up by "a fresh orchestrator invocation... yours after a restart, or another one told to pick this up," reading the two state files. Resuming the live agent instead skips the very re-derivation-from-disk step the design relies on to survive a killed process, and blurs the phase boundary the spec treats as a hard gate.

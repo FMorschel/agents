@@ -61,6 +61,8 @@ Tests should construct the unit with its fakes directly, with no wrapper widget,
 
 The packages named below are the user's pre-approved defaults for projects that have no equivalent yet: adding one as a dependency for this purpose needs no separate yes, but say so in the report. A project that already solves the problem another way keeps its way.
 
+**Any other new dependency a test wants** (a database engine, an assertion helper, a fixture library) is an extra that needs the user's yes, unless its publisher is `dart.dev`, `tools.dart.dev`, `flutter.dev`, or one already used by a package in the project's `pubspec.yaml` (check with `pub_dev_search` or the package's pub.dev page). Without the yes, use what the project already has, or fake the dependency instead.
+
 - **Now:** never `DateTime.now()` inside a test's expectation. Use `package:clock` (`clock.now()`) in code and `withClock` / a fake `Clock` in tests.
 - **Timers, debounces, retries, delays:** `package:fake_async` (`fakeAsync((async) { …; async.elapse(const Duration(seconds: 5)); })`, combined with `withClock` when the code also reads the time); in widget tests, `tester.pump(duration)`. Never a real wait.
 - **Randomness:** usually assert the shape (length, format, uniqueness), not the value. When the test needs a specific value, inject a `Random` or an ID-generator abstraction and pass `Random(42)` or a fake returning fixed IDs.
