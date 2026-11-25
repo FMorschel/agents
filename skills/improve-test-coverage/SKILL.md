@@ -12,7 +12,7 @@ The orchestrator's *narrow: more coverage* route and the existing-feature `test-
 ### 1. Establish the situation
 
 - Does the target have any structured tests? None → `test-writer`. Some → measure first.
-- Check the project's `specs/regression-test-backlog.md` for pending entries on this module; they join the work (see `write-regression-test`).
+- If the project has a `specs/regression-test-backlog.md`, check it for pending entries on this module; they join the work (see `write-regression-test`). If the file does not exist, carry on: it is only created on the first entry.
 
 ### 2. Run
 
