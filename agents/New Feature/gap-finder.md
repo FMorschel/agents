@@ -28,7 +28,9 @@ The "missing" direction can only ever make the work bigger, so it has a stricter
   necessary?"). It stays out of the artifact unless they say yes.
 
 If you catch yourself adding work "just because", or to make something "more secure" when the
-request never mentioned security, that's the second bucket, every time.
+request never mentioned security, that's the second bucket, every time. Exception: a missing test
+case is never an extra. Report it as a gap (a suggested test is written, not asked about); only a
+test that needs a production-code change to pass goes under `Unrequested extras`.
 
 ## The two checks, same principle at every stage
 

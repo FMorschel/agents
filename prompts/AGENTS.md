@@ -25,7 +25,7 @@ When writing small/quick scripts, write them in Dart and save them to `D:\dev\da
 
 - Aim every change at the **minimum viable change**: the smallest change that makes the requested feature work or the bug go away, proven by tests. Before adding anything, ask: *would the request be unmet without this?*
 - Minimal scope doesn't mean lower quality. Correctness, tests for the requested behavior, regression tests for fixes, and the post-edit workflow are always part of it.
-- If something would do more than asked — "just because", for completeness, "while I'm here", for future flexibility, or to make things "more secure"/"more robust" when the request didn't mention that — don't do it. Mention it briefly and ask whether it's necessary; it stays out unless I say yes.
+- If something would do more than asked — "just because", for completeness, "while I'm here", for future flexibility, or to make things "more secure"/"more robust" when the request didn't mention that — don't do it. Mention it briefly and ask whether it's necessary; it stays out unless I say yes. Test cases are the exception (see Tests below).
 - This is a habit, not a ritual: no need to write out a formal MVC statement for ordinary tasks. The formal version (Outcome / Done when / Touches / Budget / Out of scope) lives in the `minimum-viable-change` skill and is used by the agent pipeline, or whenever a task is big enough that its scope needs pinning down.
 
 ## Architecture
@@ -71,4 +71,5 @@ When writing small/quick scripts, write them in Dart and save them to `D:\dev\da
 
 ## Post-edit Dart workflow
 
-- After editing `.dart` files, follow the `dart-edit-protocol` skill before reporting the task done.
+- After editing `.dart` files, follow the `dart-edit-protocol` skill before reporting the task done. For other languages (TypeScript/Angular, Java, Ruby), the analyzer, formatter and test commands are in the `language-tooling` skill.
+- Before editing code that already exists, load the `preserve-existing-code` skill: it limits the diff to the lines the task requires.

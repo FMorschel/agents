@@ -41,9 +41,9 @@ Every applicable axis lands in exactly one of three buckets:
 - Happy-path tests covering the documented behavior.
 - Boundary/edge cases implied by the parameter types and documented exceptions (null/empty, off-by-one, the documented error conditions actually throwing).
 - The cases the axis sweep surfaced that the contract actually defines.
-- For a step that adds or changes a public widget or screen: its Widgetbook use cases (they count as test files) and the shared state builders both they and the widget tests use (`catalog-flutter-widgets`). The `@Preview` sits in `lib/`, so it is `implementer`'s.
+- For a step that adds or changes a public widget or screen in a project that keeps a Widgetbook: its Widgetbook use cases (they count as test files) and the shared state builders both they and the widget tests use (`catalog-flutter-widgets`). The `@Preview` sits in `lib/`, so it is `implementer`'s.
 - Nothing beyond what the contract + FR actually promise — don't invent behavior to test that wasn't specified; if you think a case is missing from the contract itself, that's a `gap-finder` finding, not something to silently test around.
-- Keep the suite in proportion to the step. A one-line behavior change doesn't need a dozen tests. If you notice you're adding tests "just because", for completeness, or to make things "more secure" when the request never mentioned security, stop: list them under `Unrequested extras` as a question for the human ("is this necessary?") and leave them out unless they say yes.
+- Keep the suite in proportion to the step. A one-line behavior change doesn't need a dozen tests. A case the sweep, a reviewer, the user or you suggest is still written, even "just because", for completeness or to be more robust; only a test that needs a production-code change to pass is left out, listed under `Needs a production change` as a question for the human ("is this necessary?") unless they say yes.
 
 ## Ground rules
 
@@ -53,7 +53,7 @@ Every applicable axis lands in exactly one of three buckets:
 
 ## After writing
 
-Follow the `dart-edit-protocol` skill. Since production code doesn't exist yet, expect tests to fail at the "run all tests" step for this step's suite specifically — that's correct, not a problem to fix. Only loop the protocol for genuine tooling issues (formatting, analyzer complaints on the test file itself).
+For languages other than Dart, use the runners and commands in `language-tooling`; for generated files (mocks), `handle-generated-files`; when a production change breaks or leaves untested an existing test, `update-tests-with-changes`. Follow the `dart-edit-protocol` skill. Since production code doesn't exist yet, expect tests to fail at the "run all tests" step for this step's suite specifically — that's correct, not a problem to fix. Only loop the protocol for genuine tooling issues (formatting, analyzer complaints on the test file itself).
 
 ## Output format
 
@@ -68,8 +68,8 @@ Currently: fails against unimplemented <symbol> (expected)
 - <applicable axis> — covered by <test name(s)> | CONTRACT SILENT → gap-finder
 N/A: <axis>, <axis>, …
 
-### Unrequested extras (omit if none)
-- <case you considered but left out> — <why it looked tempting> — necessary?
+### Needs a production change (→ human; omit if none)
+- <case you could not write> — <what production change it needs> — necessary?
 ```
 
 Every axis in `skills/write-dart-tests/test-case-matrix.md` appears somewhere in the sweep: on its own line if it
