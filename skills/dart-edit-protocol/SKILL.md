@@ -28,8 +28,8 @@ The Dart MCP server's analysis and pub tools act on registered roots; with none 
 ### The loop
 
 ```
-1. dart fix --apply                (MCP: dart_fix)
-2. dart format <files you edited>  (MCP: dart_format — edited files only, never the whole tree)
+1. dart fix --apply                (MCP: analyze_files with applyFixes — then revert changes outside the lines the task touches)
+2. dart format <files you edited>  (edited files only, never the whole tree — then revert changes outside the lines the task touches)
 3. dart analyze                    (MCP: analyze_files)
    → new diagnostics appeared?     go back to step 1
 4. diagnostics remain that
@@ -38,7 +38,8 @@ The Dart MCP server's analysis and pub tools act on registered roots; with none 
    → a failure requires an edit?   make the edit, then restart from step 1
 ```
 
-- Read **every** diagnostic, including warnings and infos. "No errors" is not the bar; resolve the underlying issue unless the user has opted out of that lint. Do not silence with `// ignore:` to get to green unless the ignore is genuinely correct and you say why.
+- Steps 1 and 2 follow `preserve-existing-code`. `dart fix --apply`, `applyFixes` and `dart format` cannot be limited to certain lines, so run them, then revert (or ask about) whatever they changed outside the lines the task touches; do not accept it along with the diff.
+- Read **every** diagnostic, including warnings and infos. "No errors" is not the bar; resolve the underlying issue unless the user has opted out of that lint. Do not silence with `// ignore:` to get to green: a new suppression goes in only after asking the user (see `preserve-existing-code`), and only when the ignore is genuinely correct and you say why.
 - **Async rule, checked by hand when no lint covers it:** functions returning a `Future` are `async` and their futures are `await`ed (including `return await foo();`, for a complete error stack and so errors reach an enclosing `try`/`catch`; also `=> await foo()` in `async` arrow bodies, which `async_return_with_no_await` doesn't cover), unless explicitly `unawaited(...)` or carrying an `// ignore:` for the specific diagnostic (`unawaited_futures`, `discarded_futures`). The narrow exception is returning a `Future.value(...)` / `Future.syncValue(...)` call directly (not `Future.sync`). Never remove a `return await` just to satisfy the deprecated `unnecessary_await_in_return`; flag the conflict instead. If the project doesn't enable those lints, scan your own edits for violations before step 3. Details in `review-flutter-async-and-disposal` (section A).
 - Step 5 runs the full suite, not just your file. While iterating, a project with test-type tags may exclude them (`dart test -x slow -x golden`, see `write-dart-tests`, Tags), but the last run before reporting done includes every tag. Prefer failures-only output (`dart test -r failures-only`) to keep it readable and you should mostly not need tail.
 - Restart the loop from step 1 after *any* edit made to resolve a diagnostic or a failure; each edit can create new ones.

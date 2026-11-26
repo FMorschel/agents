@@ -20,6 +20,18 @@ A spawned agent starts cold. Put in the brief everything it can't derive:
 
 Match the agent to the job: a `tester` for tests only, an `implementer` for production code against existing tests, an `orchestrator` for a multi-step pipeline. Don't use an orchestrator for a single small fix.
 
+### When to create subagents
+
+Split the work across subagents when it is **repetitive and independent**: the same kind of change or check applied to many files, folders or items, where each unit touches only its own files and doesn't depend on the others (batch edits across many files, one review per module, one lookup per item). Give each agent a disjoint set of files, run them in parallel and tell each which files are its own (see the working-tree rules below).
+
+Do the work yourself when:
+
+- it is a small change, or a handful of edits you finish faster than writing a brief;
+- the parts depend on each other or edit the same files (sequence them, or do it yourself);
+- the next step needs the result right now and nothing else can run meanwhile.
+
+Pick the most restricted agent type that fits, and a cheaper model for mechanical, well-specified edits. Reserve judgment-heavy units for a stronger model or yourself.
+
 **Paste the waiting rules into the brief of every agent that has the Bash tool** (orchestrator, tester, implementer, test-writer, coverage-auditor, the bug-hunt agents, api-doc-writer, commit-composer, pubdev-release-agent, flutter-visual-reviewer). A spawned agent only follows this skill if it loads it, and nothing forces that. So end the brief with this block, verbatim. It is the whole instruction: do not also tell the agent to load this skill, since the block already carries the rules and loading the skill would pay for them twice:
 
 > Waiting rules: no `until grep`/`until pgrep` polling loops; use a foreground command when you will wait anyway, or `run_in_background` and wait for its exit notification, or `Monitor` with a hard bound (`timeout 1800 bash -c '...'`) on a process exiting or a file existing, never on matching output text. A `timeout` that kills a run leaves any output-matching waiter hanging forever. One waiter per run; stop the previous run and its waiter before re-running. A subagent never ends its turn to wait: nothing re-invokes it, so its last message is its report. No `git stash`, `checkout`, `restore`, `reset` or `clean` in a shared tree. Before you report, `TaskStop` every background command you started that is still running, and state `no background commands running`.

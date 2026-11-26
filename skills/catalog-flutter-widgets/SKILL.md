@@ -1,6 +1,6 @@
 ---
 name: catalog-flutter-widgets
-description: "Use whenever you add or change a public Flutter widget or screen, write or review its UI tests, or are asked about Widgetbook, widget catalogs or the Flutter Widget Previewer (`@Preview`). Every new public widget and screen gets a Widgetbook use case and an `@Preview`: they are part of its test coverage (shared state builders for widget, golden and accessibility tests; visual regression where Widgetbook Cloud is set up) and let it be reviewed, accessibility included, at different sizes, text scales, themes and text directions. Says what each entry covers, who writes it, where it goes, and what to do when the project has no Widgetbook yet."
+description: "Use whenever you add or change a public Flutter widget or screen, write or review its UI tests, or are asked about Widgetbook, widget catalogs or the Flutter Widget Previewer (`@Preview`). Where the project keeps a catalog, every new public widget and screen gets a Widgetbook use case and/or an `@Preview` (whichever the project uses): they are part of its test coverage (shared state builders for widget, golden and accessibility tests; visual regression where Widgetbook Cloud is set up) and let it be reviewed, accessibility included, at different sizes, text scales, themes and text directions. Says what each entry covers, who writes it, where it goes, and what to do when the project has no Widgetbook yet."
 ---
 
 ## Cataloging Flutter widgets
@@ -10,7 +10,7 @@ A Widgetbook entry is **part of a widget's tests**, not documentation next to th
 - **Testing.** Its use cases are the widget's named states, built once and reused by the widget, golden and accessibility tests (see "Use cases as test fixtures"). Where the project runs Widgetbook Cloud, each use case is snapshotted across the addon combinations on every PR, which is visual regression testing at a breadth hand-written goldens rarely reach.
 - **Review.** A human (or `flutter visual reviewer`) can look at the widget in isolation and check its layout and accessibility at different sizes and text scales without navigating the app to reach it.
 
-So a new public widget without its use cases has a test gap, the same way it would without a widget test. Automated accessibility guideline tests still live in `write-flutter-ui-tests`; the catalog adds the cases a guideline test cannot judge (does it still read well at 2.0, in RTL, on a small phone).
+So, in a project that keeps a catalog, a new public widget without its use cases has a test gap, the same way it would without a widget test. Automated accessibility guideline tests still live in `write-flutter-ui-tests`; the catalog adds the cases a guideline test cannot judge (does it still read well at 2.0, in RTL, on a small phone).
 
 ### Who writes it
 
@@ -20,7 +20,8 @@ So a new public widget without its use cases has a test gap, the same way it wou
 ### When this applies
 
 - **The project uses Widgetbook** when one of its packages (normally `widgetbook/`) lists `widgetbook` in its `dependencies`. Only then are use cases required, and only then is a missing one a gap.
-- **Without that dependency**, `@Preview` still applies; Widgetbook use cases do not. The setup is proposed once (see "When the project has no Widgetbook yet"), never added, and nothing is reported as missing per widget.
+- **`@Preview` is required only where the project already uses it** (existing `@Preview` functions in `lib/`) and its Flutter version ships the Previewer. Otherwise it is optional and not a finding.
+- **Without either**, the project keeps no catalog: nothing here is required, and a catalog is never introduced just for testing. The Widgetbook setup can be proposed once (see "When the project has no Widgetbook yet"), never added, and nothing is reported as missing per widget.
 - **Only the current change counts.** Required entries are those for widgets the current change adds or changes. Existing widgets without entries are never a finding, including right after Widgetbook is added: that change warns only about the widgets it touches. A backfill of the rest is at most one `Unrequested extras` line.
 
 ### Which widgets get an entry
@@ -79,7 +80,7 @@ Add an `@Preview` from `package:flutter/widget_previews.dart` alongside each Wid
 
 ### When the project has no Widgetbook yet
 
-Do not scaffold a Widgetbook app unasked: it is a new package, a new app target and a workspace change to the root `pubspec.yaml`. Propose the setup once (the `widgetbook/` workspace package above, and which addons), and until the user says yes, add only the `@Preview` (when the Flutter version supports it) and list the missing Widgetbook entries in the report. Still write the state builders, in the test helpers the repo already uses, so the tests use them now; moving them into `widgetbook/lib/src/states/` is part of the setup.
+Do not scaffold a Widgetbook app unasked: it is a new package, a new app target and a workspace change to the root `pubspec.yaml`. Propose the setup once (the `widgetbook/` workspace package above, and which addons), and until the user says yes, add no Widgetbook entries (an `@Preview` only if the project already uses them, when the Flutter version supports it). Only a project that follows the catalog convention needs its missing entries listed in the report; do not make a catalog a condition of the tests. Still write the state builders, in the test helpers the repo already uses, so the tests use them now; moving them into `widgetbook/lib/src/states/` is part of the setup.
 
 ### Before reporting done
 

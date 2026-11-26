@@ -37,8 +37,11 @@ format in the `write-dart-tests` skill), not argued one by one.
    negative behaves differently* from the others. Not one per axis by default; one per distinct
    failure path. Pin the **error contract**, not just "it failed": the exception type (or error
    code) and a stable part of the message, whether it surfaces as a synchronous throw or a failed
-   `Future`/`Stream`, and that state is left unchanged afterwards (`expect(() => f(''),
-   throwsA(isA<FormatException>()))`, then the balance is still 100 — not `throwsA(anything)`).
+   `Future`/`Stream`, and that state is left unchanged afterwards (Dart: `expect(() => f(''),
+   throwsA(isA<FormatException>()))`; Jest: `expect(() => f('')).toThrow(RangeError)`; JUnit:
+   `assertThrows(NumberFormatException.class, () -> f(""))`; RSpec: `expect { f("") }.to
+   raise_error(ArgumentError, /empty/)` — then the balance is still 100; never "throws anything").
+   Translate the examples to the project's syntax (test tooling per language: `language-tooling`).
 
 ### Conditional axes (only when the unit's types or behavior call for them)
 
@@ -47,7 +50,8 @@ goes on the `N/A:` line. An axis the contract is silent about is still reported 
 never given an invented expected value (see Scope boundary).
 
 7. **Text input: malformed and hostile strings** — for a unit that parses, validates, formats or
-   forwards a `String`. Pick the classes the unit could plausibly treat differently:
+   forwards a `String`. Mind the unit of counting: `length` counts UTF-16 code units in Dart,
+   JavaScript/TypeScript and Java. Pick the classes the unit could plausibly treat differently:
    whitespace-only; leading/trailing whitespace; very long; control characters, newlines, null
    bytes; Unicode (combining marks, emoji and surrogate pairs — is `'👩‍👩‍👧'` 1 character or 5? —
    zero-width and right-to-left characters, lookalike quotes); strings that look like another
@@ -58,13 +62,16 @@ never given an invented expected value (see Scope boundary).
    `parseUsername(String)` today gets `''` and `'bad name'`; this axis adds `'   '`, `'a\u0000b'`,
    the emoji family, and a 10,000-character string.
 8. **Numeric boundaries** — for a unit that takes or returns numbers: 0, -1, the limits of any
-   documented range and one step either side, `int` overflow (and VM vs. web, where `int` differs),
-   `NaN`, infinities, `-0.0`, division by zero, rounding direction at `.5`.
+   documented range and one step either side, integer overflow (the size changes per language:
+   32-bit `int` in Java, `Number` safe only up to 2^53−1 in JavaScript, 64-bit on the Dart VM but
+   not on the web), `NaN`, infinities, `-0.0`, division by zero, rounding direction at `.5`.
    `percent(int part, int total)` gets `(1, 2)` today; this adds `(0, 0)`, `(1, -2)` and
    `(maxInt, 1)`.
 9. **Time and date** — for a unit that does calendar or clock arithmetic: DST gaps and overlaps,
-   leap day, month/year rollover (`Jan 31` + 1 month), UTC vs. local, `DateTime` with and without
-   a zone, and an injected clock instead of `DateTime.now()` so the test is deterministic.
+   leap day, month/year rollover (`Jan 31` + 1 month), UTC vs. local, date-times with and without
+   a zone (`DateTime`, `Date`, `Instant`/`LocalDateTime`, `Time`), and an injected clock instead of
+   reading the current time (`DateTime.now()`, `Date.now()`, `Instant.now()`, `Time.now`) so the
+   test is deterministic.
 10. **Idempotency and round-trip** — a property check that needs no per-case expected value:
     `f(f(x)) == f(x)` for normalizers and formatters, and `decode(encode(x)) == x` for every
     inverse pair, including `x` with null optionals and empty collections.
@@ -80,7 +87,7 @@ never given an invented expected value (see Scope boundary).
     elements, a very long string), and deep nesting (a 10,000-deep nested list into a recursive
     `flatten`). Assert it completes and returns the right result, not a wall-clock time.
 
-### Extra axes for code-transforming work (analyzer plugins, lints, fixes, assists, codegen)
+### Extra axes for code-transforming work (analyzer plugins, lints, codemods, fixes, assists, codegen)
 
 Skip this section entirely unless the unit reads or rewrites source code.
 
@@ -106,7 +113,9 @@ The sweep tells you which cases *exist*. It does not license testing behavior th
 promised. An axis the contract leaves undefined is a **`gap-finder` finding**, not a test you
 invent an expected value for. Report it; don't guess it.
 
-**Unrequested-work check:** if a case you're about to add only exists "for completeness", "just
-in case", or to make the code "more robust"/"more secure" — and neither the request nor the
-contract mentioned that concern — don't write it. List it under `Unrequested extras` as a
-question for the human ("is this case necessary?") and leave it out unless they say yes.
+**Suggested cases, even for completeness:** a case that the sweep, a reviewer, the user or you
+suggest is written, even when the request doesn't mention it ("for completeness", "just in case",
+to make the code "more robust"/"more secure"). More tests help, and the user can remove them later;
+don't leave them out and don't turn them into a question. Only what needs a production-code change
+to pass goes to the human ("<test> only passes with <production change> — acceptable?"), because
+that is a behavior change (the `Unrequested extras` rule of `minimum-viable-change`).

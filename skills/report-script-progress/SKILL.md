@@ -1,6 +1,6 @@
 ---
 name: report-script-progress
-description: "Use whenever you write or edit a script or CLI tool (Dart especially) that does more than one step or may run longer than a moment: it must always tell the user what it is doing right now, before the slow part starts, instead of sitting silent, and offer a verbose mode where that helps. Covers what to announce, when to print it, how to keep progress separate from results, and what verbose adds."
+description: "Use whenever you write or edit a script or CLI tool in any language (Dart, Node.js, Java, Ruby, shell) that does more than one step or may run longer than a moment: it must always tell the user what it is doing right now, before the slow part starts, instead of sitting silent, and offer a verbose mode where that helps. Covers what to announce, when to print it, how to keep progress separate from results, and what verbose adds."
 ---
 
 ## Reporting script progress
@@ -27,7 +27,29 @@ await stdout.flush();
 stdout.writeln(_fmt(elapsed));
 ```
 
-Result: `running A1 ... 130.0 ms`. The `flush` is what makes the first half visible during the work; without it, buffered output can appear all at once at the end.
+The same in other languages (per-language flush and stdio details are in `language-tooling`):
+
+```typescript
+process.stdout.write(`${label} ... `);
+// ... do the work (await) ...
+process.stdout.write(`${fmt(elapsed)}\n`);
+```
+
+```java
+System.out.print(label + " ... ");
+System.out.flush();
+// ... do the work ...
+System.out.println(fmt(elapsed));
+```
+
+```ruby
+$stdout.print "#{label} ... "
+$stdout.flush
+# ... do the work ...
+puts fmt(elapsed)
+```
+
+Result: `running A1 ... 130.0 ms`. The `flush` is what makes the first half visible during the work; without it, buffered output can appear all at once at the end (in Node.js terminal writes are already synchronous, but a loop that never yields to the event loop also freezes the screen).
 
 For a step whose output is shown (a `--show-output` or `--verbose` mode, or a child process printing straight to the terminal), the one-line form would be cut up by that output. Wrap the step in start and end markers on their own lines instead:
 
@@ -64,7 +86,7 @@ Rules for it:
 - **Show everything the script runs, including runs that are not measured.** A step the user didn't see is a step they can't account for in the total time.
 - **Progress is not the result.** Keep results in one clearly separated block at the end (a blank line, then the table or summary) so they can be found and copied. Progress lines come first.
 - **Errors go to stderr, progress and results to stdout**, so redirecting stdout to a file still yields only the results and progress, and failures stay visible. When a step fails, finish its line (`failed`, exit code) before printing the error.
-- **Stream, don't collect.** If a child process's output should be visible, let it inherit stdio (`ProcessStartMode.inheritStdio`) instead of capturing and printing it afterwards. Capturing delays the output until the step ends and changes timing.
+- **Stream, don't collect.** If a child process's output should be visible, let it inherit stdio (Dart: `ProcessStartMode.inheritStdio`; Node.js: `stdio: 'inherit'`; Java: `ProcessBuilder.inheritIO()`; Ruby: `system`) instead of capturing and printing it afterwards. Capturing delays the output until the step ends and changes timing.
 - **Don't announce a loop's every iteration when it runs thousands of times.** Throttle: print every N items or every second, or overwrite one status line. The goal is that the user never watches a frozen screen for more than a moment, not that the screen scrolls forever.
 - **Say how to see more.** When output is discarded by default, the help text should mention the flag that shows it.
 

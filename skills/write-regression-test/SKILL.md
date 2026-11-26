@@ -1,17 +1,18 @@
 ---
 name: write-regression-test
-description: "Use whenever a bug is being fixed, or when converting a `regression-test-backlog.md` entry into a real test. Defines how to write a regression test that provably fails on the pre-fix code and passes on the fix, where it lives, who writes it, and how the backlog entry is closed. Companion to `write-dart-tests`."
+description: "Use whenever a bug is being fixed, or when converting a `regression-test-backlog.md` entry into a real test. Defines how to write a regression test that provably fails on the pre-fix code and passes on the fix, where it lives, who writes it, and how the backlog entry is closed. Applies to any language (Dart/Flutter, TypeScript/Angular, Java, Ruby). Companion to `write-dart-tests`."
 ---
 
 ## Writing a regression test
 
-A fix is not done until a regression test pins the defect. A green suite and a clean `dart analyze` are not a substitute — the suite is green precisely because it never covered this case. The only thing that lifts this rule is an explicit human "no test" / "skip the regression test"; "just fix it" is about speed, not coverage. If it is skipped, say so plainly in the report and leave the backlog entry at *pending regression test*.
+A fix is not done until a regression test pins the defect. A green suite and clean static analysis (analyzer, linter, type checker) are not a substitute — the suite is green precisely because it never covered this case. The only thing that lifts this rule is an explicit human "no test" / "skip the regression test"; "just fix it" is about speed, not coverage. If it is skipped, say so plainly in the report and leave the backlog entry at *pending regression test*.
 
-Write the test itself following `write-dart-tests`; this skill adds what is specific to regressions.
+Write the test itself following `write-dart-tests` (commands for each language are in `language-tooling`); this skill adds what is specific to regressions.
 
 ### Who writes it
 
-- **Test-owning agents only**: `tester` (new-feature flow) or `test writer` (existing-feature flow). `implementer` never writes it, even for a one-line fix. The implementer reports `fix applied — regression test still needed`.
+- **Whoever fixes the bug writes the regression test, first (see red → green below), even for a one-line fix.** Without it, report `fix applied — regression test still needed`.
+- **In the pipeline**, the test-owning agents write it: `tester` (new-feature flow) or `test writer` (existing-feature flow). `implementer` never writes it, even for a one-line fix; it reports `fix applied — regression test still needed`. In a direct fix outside the pipeline, whoever makes the fix writes the test.
 - `bug verifier` never writes it either: its throwaway repro and the backlog entry are the *source* for the test, not the test.
 
 ### The backlog
@@ -53,7 +54,7 @@ Status: pending regression test
 - **For a bug triggered by a kind of input rather than a number**, the neighbors are the sibling classes on the same axis of `skills/write-dart-tests/test-case-matrix.md`: a crash on `'İ'` also gets `'ß'` and a combining mark; a bug on `Jan 31` also gets `Feb 29` and `Dec 31`; a failure on `"'"` in a query also gets `"%"` and `"\\"`. Include a sibling only if the fixed code should handle it the same way; one that should behave differently is a separate case, not a neighbor. If the bug hunt's verdict said the whole class was affected, cover the class, not only the reported value.
 - **Same public entry point the bug was reported through**, not the private helper where the defect happens to sit. A test at the helper survives a refactor that reintroduces the bug one layer up.
 - **Deterministic.** If the original failure was a race or timing issue, control the clock/scheduler/completer so the test forces the bad interleaving instead of hoping for it. A flaky regression test is worse than none.
-- Put it in the module's existing test file, in a `group('regressions', ...)` (or the file's existing convention), not in a new scratch file.
+- Put it in the module's existing test file, in a `regressions` group (`group` in Dart, `describe` in Jest and RSpec, `@Nested` in JUnit, or the file's existing convention), not in a new scratch file.
 
 ### Prove it catches the defect (red → green)
 
@@ -66,9 +67,9 @@ The test must **fail against the pre-fix code and pass against the fixed code**.
 ### Closing the loop
 
 - Update the backlog entry's **Status** from *pending regression test* to *regression test merged*, in the same change as the test.
-- Run the full suite, then follow the `dart-edit-protocol` skill.
+- Run the full suite, then the post-edit flow for the language (Dart: the `dart-edit-protocol` skill; the others: `language-tooling`).
 - Do not route to `commit-composer` while the regression test is missing; that is a blocking gap, on the same footing as an architecture violation.
 
 ### When the bug can't be reproduced in a unit test
 
-Escalate to the smallest test level that can (integration or widget test; a visual bug may need a golden, see `write-flutter-ui-tests`) rather than dropping the test. If no automated test is feasible, do not silently skip: state why, propose the closest guard (an assertion, a lint, a documented manual check), and get an explicit human decision.
+Escalate to the smallest test level that can (integration or UI component test; a visual bug may need a screenshot test, in Flutter a golden, see `write-flutter-ui-tests`) rather than dropping the test. If no automated test is feasible, do not silently skip: state why, propose the closest guard (an assertion, a lint, a documented manual check), and get an explicit human decision.

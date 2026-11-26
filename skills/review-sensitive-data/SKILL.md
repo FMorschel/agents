@@ -22,6 +22,7 @@ Findings route to `task structurer` (missing NFR) or `api designer` (contract do
 Scan for:
 
 - Hardcoded secrets, API keys or credentials in source.
+- A real scope identifier (company, tenant, client) handed to an AI model or other untrusted system that should only see a placeholder; or a placeholder replaced before validation finishes (see the untrusted-source SQL validator section of `review-sql-safety`).
 - Sensitive fields passed to `print`/`log`/`debugPrint`, or included in a `toString()` that could reach a log.
 - Passwords stored or compared in plaintext (look for a hashing call on both the write and the comparison path).
 - Sensitive data in insecure local storage (a raw token in `SharedPreferences` where secure storage exists and is unused) or written to disk unencrypted.

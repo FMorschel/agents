@@ -1,6 +1,6 @@
 ---
 name: layered-architecture
-description: "Use when designing, placing, implementing, or reviewing Dart/Flutter code against the default layered architecture (View → Controller → Service → Repository → Data Source, or Endpoint → Service → … for headless apps): layer responsibilities, dependency direction, Model vs. ViewModel, caching, and upward event flow via per-layer Streams. This is the fallback when the project has no architecture doc of its own — a project's own `architecture.md` always wins."
+description: "Use when designing, placing, implementing, or reviewing code (Dart/Flutter, Angular/TypeScript, Java, Ruby) against the default layered architecture (View → Controller → Service → Repository → Data Source, or Endpoint → Service → … for headless apps): layer responsibilities, dependency direction, Model vs. ViewModel, caching, and upward event flow via per-layer streams. This is the fallback when the project has no architecture doc of its own — a project's own `architecture.md` always wins."
 ---
 
 ## Default layered architecture
@@ -18,7 +18,7 @@ Architecture source: <project architecture.md | this skill's default | inferred 
 ### Layers (UI app)
 
 ```
-View (Widget)              observes a ViewModel, no logic
+View (widget, component)    observes a ViewModel, no logic
 Controller                 knows Service; exposes ViewModel state to the View
 Service / Use Case         knows Repository (interface); returns ViewModels
 Repository (interface)     returns Models (domain)
@@ -30,8 +30,8 @@ Data Source / Gateway      raw I/O: HTTP, SQL, files, sockets (optional layer)
 |---|---|---|
 | **View** | Render the current ViewModel; forward user input to the Controller | Business or orchestration logic |
 | **Controller** | Receive input; format-level validation only ("is this parseable / non-empty?"); call a Service; update the ViewModel state | Business rules, storage, knowing how data is persisted |
-| **Service** | Business rules and invariants; orchestrate one or more Repositories; transactions/rollback; map **Model → ViewModel** | Know about HTTP, widgets, SQL, or any infrastructure detail; return status codes |
-| **Repository** | CRUD on one aggregate/entity; map Model ↔ storage format; encapsulate queries; primary home of domain caching | Business rules; calling another Repository; knowing ViewModels or widgets |
+| **Service** | Business rules and invariants; orchestrate one or more Repositories; transactions/rollback; map **Model → ViewModel** | Know about HTTP, widgets/components, SQL, or any infrastructure detail; return status codes |
+| **Repository** | CRUD on one aggregate/entity; map Model ↔ storage format; encapsulate queries; primary home of domain caching | Business rules; calling another Repository; knowing ViewModels or widgets/components |
 | **Data Source** | Raw I/O, (de)serialization, retries, connection handling, raw-response caching (ETag/304) | Domain rules; returning ViewModels |
 
 ### Headless variant (daemon, server, CLI, background service)
@@ -41,9 +41,9 @@ No View or ViewModel exists, so `View → ViewModel → Controller` collapses in
 ### Key rules
 
 1. **Depend on abstractions.** A Service takes `OrderRepository` (abstract), never `SqliteOrderRepository`. Swapping storage must be a DI binding change only.
-2. **Models are pure.** Plain Dart classes: no framework imports, no annotations, no JSON keys. Mapping to/from storage happens at the Repository boundary.
+2. **Models are pure.** Plain types of the language (Dart class, TypeScript interface/class, Java POJO or `record`, Ruby PORO): no framework imports, no annotations, no JSON keys. Mapping to/from storage happens at the Repository boundary.
 3. **ViewModels are UI-shaped and separate from Models.** They hold what the View displays (formatted strings, labels). The Service maps Model → ViewModel; a Repository never sees one.
-4. **One direction only.** A Repository importing a Widget or ViewModel, or a Service returning an HTTP status, has crossed a boundary.
+4. **One direction only.** A Repository importing a Widget/component or ViewModel, or a Service returning an HTTP status, has crossed a boundary.
 5. **Services orchestrate, Repositories operate.** An operation touching two Repositories is coordinated by the Service. A Repository never calls another Repository.
 6. **Add layers only when the pain justifies it.** Small features may be Controller → Service → Repository. Add a Data Source when there are multiple sources (local + remote + cache). A dedicated Domain layer (entities, value objects) is the step toward full Clean Architecture, not the default.
 7. **A change touches only the layers whose behavior changes.** These rules describe where code *goes*, not a set of layers every change has to pass through. Don't add a pass-through method, abstraction or stream to a layer just so the change "goes through all the layers". If an existing layering gap isn't in the way of the requested change, fixing it isn't part of the Minimum Viable Change (see the `minimum-viable-change` skill). Report it as an unrequested extra and ask the human instead.
@@ -58,10 +58,10 @@ No View or ViewModel exists, so `View → ViewModel → Controller` collapses in
 
 Background pushes (acks, state changes, takeovers) originate at the bottom and must reach the top. This does not break "downward only", because *dependency direction* (compile-time imports) and *data flow* (runtime) are separate:
 
-- Only when an upward event is actually required: each layer on its path exposes its own `Stream` and emits into it without knowing its listeners. A feature with no background push needs no streams.
+- Only when an upward event is actually required: each layer on its path exposes its own stream (`Stream` in Dart, RxJS `Observable`/`Subject` or a signal in Angular, `Flow`/`Publisher` in Java, a `Queue`/callback in Ruby) and emits into it without knowing its listeners. A feature with no background push needs no streams.
 - A layer subscribes **only to the stream of the layer directly below it**, re-shaping and re-emitting for the layer above when the event must travel further (Data Source → Repository → Service → Controller/Endpoint).
 - **No shared or global event bus**, and no lower layer importing an upper layer's type to notify it.
-- Stream lifecycle (cancel subscriptions, close controllers) belongs to `review-flutter-async-and-disposal`.
+- Stream lifecycle (cancel subscriptions, close controllers) belongs to `review-flutter-async-and-disposal` in Flutter and to `review-angular-async-and-disposal` in Angular.
 
 ### When reviewing
 
@@ -82,3 +82,17 @@ Only call something a violation when it clearly breaks a rule above (or the proj
 Ask, top-down: *Is it about pixels or input?* → View/Controller. *A business rule or a workflow across entities?* → Service. *How one entity is loaded/saved?* → Repository. *The wire or the disk itself?* → Data Source. If a new method does not clearly belong to exactly one layer, it is doing two jobs — split it.
 
 The full spec, with worked examples (ViewModel, Controller, Service, Repository, Data Source, caching decorator, per-layer streams), is in [references/layered-architecture.md](references/layered-architecture.md). Load it only when you need the fuller rationale or a concrete shape to imitate.
+
+### Names by platform
+
+The architecture is the same; only the names change. When the project has no names of its own, use this table to recognize each layer (the project's `architecture.md` wins):
+
+| Layer | Flutter / Dart | Angular / TypeScript | Java (Spring) | Ruby on Rails |
+|---|---|---|---|---|
+| View | `Widget` | component + template | template (Thymeleaf), separate front end | view / partial / component |
+| Controller | controller / `ChangeNotifier` / cubit | component (screen logic) or facade/store | `@Controller` / `@RestController` (Endpoint) | `ActionController` (Endpoint) |
+| Service | service class / use case | service `@Injectable` | `@Service` | service object / `ActiveInteraction` |
+| Repository | abstract `Repository` + implementation | data service with an injectable interface/token | `@Repository` / Spring Data interface | repository or query object (not `ActiveRecord` directly in a Controller) |
+| Data Source | HTTP client, DAO, `sqflite`/`drift` | `HttpClient` | `RestClient`/`JdbcTemplate`/JPA | HTTP client, `ActiveRecord` as a Repository detail |
+
+Beware of framework shortcuts that skip layers (an `ActiveRecord` called straight from a Rails view/controller, an `HttpClient` injected straight into an Angular component, an `@Autowired` Repository in a Java `@Controller`): they are exactly the "Skipped layer" finding in "When reviewing", unless the project doc accepts them.

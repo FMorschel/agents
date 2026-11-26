@@ -1,6 +1,6 @@
 ---
 name: minimum-viable-change
-description: "Use whenever you define, plan, implement, test or review a change in this pipeline: the Minimum Viable Change (MVC) is the smallest diff that makes the requested feature true or the reported bug gone, verified by tests. Defines how to state the MVC up front, the per-line 'would the request be unmet without it?' test, what the MVC never trims (correctness, tests, regression tests, real exposures), the diff budget, and the 'Unrequested extras' rule: work beyond the request is left out and asked about, never added by default."
+description: "Use whenever you define, plan, implement, test or review a change in this pipeline: the Minimum Viable Change (MVC) is the smallest diff that makes the requested feature true or the reported bug gone, verified by tests. Defines how to state the MVC up front, the per-line 'would the request be unmet without it?' test, what the MVC never trims (correctness, tests, regression tests, real exposures), the diff budget, and the 'Unrequested extras' rule: work beyond the request is left out and asked about, never added by default. Also covers proportionality (over- and under-engineering signals) and the exception for tests. Do not load it just to limit changed lines in a local edit of existing code; use `preserve-existing-code`."
 ---
 
 ## Minimum Viable Change (MVC)
@@ -52,7 +52,7 @@ Minimal scope never means skipping these. They're part of *every* MVC:
 - **Correctness** — the outcome actually works, including the edge cases the request itself implies.
 - **Tests that pin the requested behavior**, and for a fix, **a regression test** that fails on the
   old code and passes on the new (see `write-regression-test`).
-- **The `dart-edit-protocol` loop** — clean analyze, formatted, green suite.
+- **The `dart-edit-protocol` loop** — clean analyze, formatted, green suite (for other languages see `language-tooling`).
 - **Project conventions and layer rules** for the code the change touches (the change fits in;
   it doesn't rearrange what it didn't touch).
 - **Real exposures the change itself creates** — e.g. the new code logs a token. That's a defect in
@@ -71,9 +71,14 @@ completeness", "while we're here", "for future flexibility", or to make things "
    human says yes**. With no answer, it stays out, and it's listed in the final report as an
    optional follow-up.
 
+**Exception: tests.** A suggested test case (by the sweep, a reviewer, the user or you) is not an
+extra, even "just because", "for completeness" or "to be more robust": write it. More tests help,
+and the user can remove them later. Only a test that needs a production-code change to pass is an
+extra (`skills/write-dart-tests/test-case-matrix.md`, "Suggested cases, even for completeness").
+
 This applies to every agent and every stage. Reviewers use it too: a reviewer finding that asks
-for work outside the MVC (and isn't one of the "never trims" items above) is an unrequested extra,
-not a gap and not a blocking finding.
+for work outside the MVC (and isn't one of the "never trims" items above, nor a test case) is an
+unrequested extra, not a gap and not a blocking finding.
 
 ### The diff budget
 
@@ -81,6 +86,30 @@ The MVC's `Budget` is a tripwire, not a target. If the actual change grows well 
 double the files, or any public API the MVC said would be `none` — the orchestrator stops and asks
 the human whether to continue, re-scope, or trim before going further. Scope creep that shows up
 gradually, one reasonable-looking step at a time, is exactly what this catches.
+
+### Proportionality
+
+This skill is mostly about not over-building. The other half of proportionality is not
+under-building what the request already implies. Both are an **opinion to offer, never a blocking
+finding**: phrase it as "this looks like more/less than the request needs, because X", not as a
+violation. Compare against the user's **original request**, not only the requirements: the
+requirements may already have grown past the request.
+
+Over-engineering signals:
+- An abstraction with exactly one implementation and no plausible second one.
+- A configuration option or parameter nobody asked for.
+- A layer or indirection added "for future flexibility" with nothing in the request pointing that way.
+
+Under-engineering signals (all measured against what the request already implies):
+- A decision the next adjacent requirement will force you to revisit.
+- An error path silently ignored instead of handled or explicitly deferred.
+- A contract too narrow for an extension the requirements already imply.
+
+Offer the finding with what to cut (over-engineering) or what to add (under-engineering). If that
+part of the work isn't in the original request, it goes under `Unrequested extras` as a question.
+If nothing stands out, say the change looks proportional to the request, so it's clear the check
+was done. In the pipeline this opinion is `engineering balance critic`'s job; this section is the
+criterion it applies.
 
 ### Quick self-check before handing off
 
