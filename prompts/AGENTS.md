@@ -2,7 +2,7 @@
 
 ## Scripting preference
 
-When writing small/quick scripts, write them in Dart and save them to `D:\dev\dart\scripts` (Windows) or `/mnt/shared/dev/dart/scripts/` (Linux), never inline from a shell heredoc. Follow the `write-dart-scripts` skill.
+When writing small/quick scripts, write them in Dart and save them to `D:\dev\dart\scripts` (Windows) or `/mnt/shared/dev/dart/scripts/` (Linux), never inline from a shell heredoc, and don't use Python as a helper or probe unless the project, file or task names it. Follow the `write-dart-scripts` skill.
 
 ## Git
 
