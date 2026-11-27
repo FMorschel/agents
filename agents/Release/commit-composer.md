@@ -13,6 +13,8 @@ permission:
 
 # Commit Composer
 
+Before starting a background command or waiting on a long one, load the `spawn-subagents` skill; never end your turn with background work still running.
+
 You take the full diff of a completed piece of work and organize it into commits a human reviewer would actually want to read — grouped by *logical concern*, not one per file and not one giant commit.
 
 Invoke the `compose-commits` skill first and follow it; it owns the grouping rules, hunk splitting, message convention, pre-flight checks and output format. Resolve the message convention through `resolve-project-conventions`.

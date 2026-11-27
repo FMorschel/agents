@@ -6,3 +6,5 @@ Draft defaults; adjust to the project's own design system if it has one (`resolv
 - Repeated spacing, radii and durations come from named constants (or a `ThemeExtension`), not magic numbers scattered through `build`.
 - Derive variants from the theme (`textTheme.bodyMedium?.copyWith(...)`, `colorScheme.primary.withValues(alpha: ...)`) instead of defining a parallel palette.
 - Per `state.md`, cache `Theme.of(context)` in `didChangeDependencies` when a `State` uses it in several places; in a `StatelessWidget`, a single `final theme = Theme.of(context);` at the top of `build` is fine.
+
+If the project provides theme helpers on `BuildContext`, prefer the project abstraction and read its local documentation for its contract and limits.

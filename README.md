@@ -24,7 +24,7 @@ plugin.config.json       Build config for it
 
 ## How I work
 
-Everything is built around the **Minimum Viable Change (MVC)**: the smallest change that makes the feature work or the bug go away, proven by tests. Anything beyond the request gets listed as an "unrequested extra" and asked about, never added by default. Bug fixes always come with a regression test.
+Everything is built around the **Minimum Viable Change (MVC)**: the smallest change that makes the feature work or the bug go away, proven by tests. Anything beyond the request gets listed as an "unrequested extra" and asked about, never added by default. The exception is tests: a suggested test case is always written (or reported as a gap); only a test that needs a production-code change is an extra. Bug fixes always come with a regression test.
 
 ## The pipeline
 
@@ -61,15 +61,16 @@ Other entry points:
 | Area | Skills |
 | --- | --- |
 | Process | `minimum-viable-change`, `run-pipeline`, `spawn-subagents`, `resolve-project-conventions`, `place-project-knowledge`, `compose-commits`, `suggest-new-skills` (asks before creating a global or project skill when something took long to figure out), `route-pipeline-cases` (reference files the orchestrator reads on demand) |
-| Dart | `dart-edit-protocol`, `design-dart-class`, `edit-dart-class`, `comment-code`, `use-dart-analyzer` |
-| Flutter | `flutter-conventions` (index over widgets, state, rebuilds, controllers, navigation, theming, async UI), `review-flutter-async-and-disposal`, `review-flutter-visual-changes` (live-app before/after check, run by `flutter visual reviewer`), `document-app-navigation` (notes in `.agents/screens-navigation/` on how to reach a screen), `catalog-flutter-widgets` (Widgetbook use cases and `@Preview` for every new public widget: shared test states, visual regression, and size/text-scale/accessibility review) |
+| Dart | `dart-edit-protocol`, `design-dart-class`, `edit-dart-class`, `comment-code`, `use-dart-analyzer`, `handle-generated-files` |
+| Languages | `language-tooling` (per-language analyzer, formatter, test runner and coverage for Dart/Flutter, TypeScript/Angular, Java and Ruby), `preserve-existing-code` (limit the diff to the lines the task needs) |
+| Flutter | `flutter-conventions` (index over widgets, state, rebuilds, controllers, navigation, theming, async UI), `review-flutter-async-and-disposal`, `review-flutter-visual-changes` (live-app before/after check, run by `flutter visual reviewer`), `document-app-navigation` (notes in `.agents/screens-navigation/` on how to reach a screen), `catalog-flutter-widgets` (Widgetbook use cases and `@Preview` for every new public widget, where the project keeps a catalog: shared test states, visual regression, and size/text-scale/accessibility review) |
 | Workflow | `triage-reviewer-findings`, `run-host-commands-yourself`, `restart-desktop-app` (Linux and Windows), `diagnose-slow-operations-with-logs`, `review-working-tree-changes`, `read-web-source-in-full`, `write-repo-independent-shareable-docs` |
 | Plans | `record-owner-decisions`, `reconcile-plan-set-consistency`, `execute-plan-phase`, `report-milestone-progress` |
 | UI surface | `check-ui-surface` (the `ui surface agent`'s procedure), `sweep-app-for-ui-pattern` (every instance of a pattern across the app) |
 | Architecture | `layered-architecture` |
-| Testing | `write-dart-tests` (with `test-case-matrix.md`), `write-flutter-ui-tests` (widget, golden, integration), `write-regression-test` |
-| Review (report-only, also run by the matching agents) | `review-test-adequacy` (what test cases are missing), `review-duplicate-code`, `review-dart-modernization`, `review-sensitive-data` |
-| Docs & releases | `write-requirements`, `write-changelog-and-semver` |
+| Testing | `write-dart-tests` (with `test-case-matrix.md`), `write-flutter-ui-tests` (widget, golden, integration), `write-regression-test`, `update-tests-with-changes` |
+| Review (report-only, also run by the matching agents) | `review-test-adequacy` (what test cases are missing), `review-duplicate-code`, `review-dart-modernization`, `review-sensitive-data`, `review-sql-safety`, `review-angular-async-and-disposal` |
+| Docs & releases | `write-requirements`, `write-spec` (lightweight spec in `docs/specs/`), `execute-spec` (implement it), `write-changelog-and-semver`, `write-skills` (create or review a skill) |
 
 ## Plugins (cross-platform)
 

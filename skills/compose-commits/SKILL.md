@@ -40,11 +40,11 @@ Adjust rather than follow blindly: fold a trivially small stage into the next; s
 
 For a fix, keep the **regression test in the same commit as the fix** (or immediately before it), so bisecting never lands on a fix without its test.
 
-Dart/Flutter specifics:
+Rules that hold in any language (the file and command names for each are in `language-tooling`):
 
-- Generated files (`*.g.dart`, `*.freezed.dart`, …) go in the same commit as the source that triggers them.
-- `pubspec.yaml` changes go in the first commit that needs the dependency; `pubspec.lock` always travels with its `pubspec.yaml` change, never alone.
-- Pure `dart format` / `dart fix` churn on lines the feature didn't otherwise change goes in its own `style`/`chore` commit (or is left out and asked about), not mixed into logic commits.
+- Generated files go in the same commit as the source that triggers them (Dart: `*.g.dart`, `*.freezed.dart`; Java: annotation-processor output, when versioned; TypeScript: generated clients and `*.generated.ts`; Ruby: `db/schema.rb` together with its migration). Untracked build artifacts (`dist/`, `target/`, `build/`, `coverage/`) are never committed.
+- Dependency manifest changes (`pubspec.yaml`, `package.json`, `pom.xml`/`build.gradle`, `Gemfile`) go in the first commit that needs the dependency; the lockfile (`pubspec.lock`, `package-lock.json`/`pnpm-lock.yaml`/`yarn.lock`, `gradle.lockfile`, `Gemfile.lock`) always travels with its manifest change, never alone.
+- Purely cosmetic formatting or auto-fix churn (`dart format`/`dart fix`, `prettier`, `spotless:apply`, `rubocop -a`) on lines the feature didn't otherwise change goes in its own `style`/`chore` commit (or is left out and asked about), not mixed into logic commits.
 
 ### 3. Split within a file when hunks are unrelated
 
@@ -73,7 +73,7 @@ Resolve the convention with the `resolve-project-conventions` skill (`CONTRIBUTI
 ### 5. Pre-flight before proposing (or executing)
 
 - **Completeness:** the union of all proposed paths plus the "Not included" list must equal `git status --porcelain` (untracked files included). Every changed file appears in exactly one commit or in "Not included" — a file split by hunks appears in several commits, but every hunk of it lands exactly once.
-- **Each commit builds:** each commit's content should compile and the analyzer should be clean at that point. When executing, check this per commit against the staged state only (`git stash push --keep-index --include-untracked`, run the Dart MCP analyze tool, then `git stash pop`), or in a temporary worktree. If you skip the check, say so in the report. Say when a commit is intentionally not standalone-green and why.
+- **Each commit builds:** each commit's content should compile and the project's static analysis should be clean at that point (the command per language is in `language-tooling`). When executing, check this per commit against the staged state only (`git stash push --keep-index --include-untracked`, run the analyzer, then `git stash pop`), or in a temporary worktree. For Dart, use the Dart MCP analyze tool. If you skip the check, say so in the report. Say when a commit is intentionally not standalone-green and why.
 - No secrets, no `.env`, no large generated artifacts in any commit.
 
 ### Output format

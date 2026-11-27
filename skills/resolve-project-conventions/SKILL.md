@@ -13,18 +13,18 @@ Agents here check or follow *this project's* patterns, never an external style g
 
    | Aspect | Look for |
    |---|---|
-   | Code style, comments, naming, imports | `CONVENTIONS.md`, `STYLE.md`, a section of `architecture.md`, `analysis_options.yaml`, `CLAUDE.md` / `AGENTS.md` |
+   | Code style, comments, naming, imports | `CONVENTIONS.md`, `STYLE.md`, a section of `architecture.md`, the analyzer/linter/formatter config (`analysis_options.yaml`, `eslint.config.js`/`.prettierrc`, `checkstyle.xml`/`.editorconfig`, `.rubocop.yml`), `CLAUDE.md` / `AGENTS.md` |
    | Layers and boundaries | `architecture.md` (or equivalent), the PRD's architecture section; if none, the `layered-architecture` skill is the default (use it only where the code's structure actually fits it) |
    | Commit messages | `CONTRIBUTING.md`, `.gitmessage` / commit template, `commitlint` config |
    | UI surface (shortcuts, icons, labels, placement) | `DESIGN.md`, a UX/style guide, a keymap/shortcuts doc |
-   | Releases | `CHANGELOG.md` header conventions, `pubspec.yaml`, release docs |
+   | Releases | `CHANGELOG.md` header conventions, the language's manifest (`pubspec.yaml`, `package.json`, `pom.xml`, `*.gemspec`), release docs |
 
    If it exists and covers the aspect, use it and stop. Do not "improve" on it.
 
-2. **Sample the code — fallback.** If there is no doc, or it is silent on this aspect, read **5–10 representative files** from the *relevant directory* (same layer, same kind of file; not the whole repo) — for commits, `git log` over the last 20–30 non-merge commits. Find the dominant pattern. Only a deviation from *that* is a finding; deviation from general Dart practice is not.
+2. **Sample the code — fallback.** If there is no doc, or it is silent on this aspect, read **5–10 representative files** from the *relevant directory* (same layer, same kind of file; not the whole repo) — for commits, `git log` over the last 20–30 non-merge commits. Find the dominant pattern. Only a deviation from *that* is a finding; deviation from general language practice is not. Per-language commands and files (analyzer, formatter, generated files) are in `language-tooling`.
    - Sample across files by different authors or dates when you can; five files from one afternoon is one data point.
    - Weigh recent code over old when they disagree and the recent code looks deliberate.
-   - Ignore generated files (`*.g.dart`, `*.freezed.dart`, `*.drift.dart`, `*.cristallyse.dart`), vendored code and tests when inferring production style, and vice versa.
+   - Ignore generated files (Dart: `*.g.dart`, `*.freezed.dart`, `*.drift.dart`, `*.cristallyse.dart`; TypeScript: `dist/`, `*.generated.ts`; Java: `target/generated-sources`, `build/generated`; Ruby: `db/schema.rb`, `sorbet/rbi/`; or any file whose header says it is generated), vendored code and tests when inferring production style, and vice versa.
 
 3. **No clear signal — say so.** If the sample is genuinely mixed (no arm above roughly 55%), report "no consistent pattern for <aspect>" and do **not** pick a side or flag deviations. In an authoring role, use the closest existing category and note the mismatch instead of inventing a new convention unilaterally.
 
@@ -43,7 +43,7 @@ When *inferring*, say so explicitly ("inferring the layers from directory names;
 - **Documented convention, clear breach** → a finding.
 - **Inferred convention, clear dominant pattern** → a finding, marked as inferred.
 - **Inferred, ambiguous or thin sample** → a question ("does this project forbid X?"), never a violation.
-- A style deviation is never "wrong" if `dart analyze` / `dart format` are silent; it is inconsistent. See the `dart-edit-protocol` skill's epistemic rule.
+- A style deviation is never "wrong" if the project's analyzer and formatter are silent (`dart analyze` / `dart format`, `eslint` / `prettier`, `checkstyle` / `spotless`, `rubocop`); it is inconsistent. In Dart, see the `dart-edit-protocol` skill's epistemic rule.
 
 ### Applying it when you are the one writing
 

@@ -1,17 +1,17 @@
 ---
 name: document-app-navigation
-description: "Use whenever you drive a running app (taps, scrolls, text entry, waits through the Dart MCP driver or any UI automation) to reach a specific screen or state. Read `.agents/screens-navigation/` first for a known route; if you had to struggle to get somewhere (wrong turns, hidden menus, required data, waits, dead ends), write or update a markdown note there so later agents and sessions do not repeat the search."
+description: "Use whenever you drive a running app (taps, scrolls, text entry, waits through the Dart MCP driver, Playwright/Cypress/Selenium, Appium or any other UI automation, on a mobile, web or desktop app) to reach a specific screen or state. Read `.agents/screens-navigation/` first for a known route; if you had to struggle to get somewhere (wrong turns, hidden menus, required data, waits, dead ends), write or update a markdown note there so later agents and sessions do not repeat the search."
 ---
 
 ## Documenting how to reach a screen
 
-Finding a screen by trial and error costs many tool calls, and the next session pays the same cost again. The notes in `.agents/screens-navigation/` (at the root of the project being driven) are the shared memory for that. Applies with `dart-mcp` (driver tools) and `review-flutter-visual-changes`.
+Finding a screen by trial and error costs many tool calls, and the next session pays the same cost again. The notes in `.agents/screens-navigation/` (at the root of the project being driven) are the shared memory for that. It applies to any UI automation. In Flutter, it applies with `dart-mcp` (driver tools) and `review-flutter-visual-changes`; in web apps (Angular and others), with the Playwright/Cypress/Selenium the project uses.
 
 ### 1. Look before you navigate
 
 Before the first tap, list `.agents/screens-navigation/` and read the note for your target screen (or the closest one: a note for a parent screen often covers the first steps). Follow it, and verify each step on screen rather than trusting it blindly. If a step no longer works, the note is stale: fix it (section 3).
 
-Text entry steps: the app's `main` must start with `enableFlutterDriverExtension(enableTextEntryEmulation: false);`. Before typing, call `flutter_driver_command` `set_text_entry_emulation` with `enabled: "true"`; when you are done typing, and always before you finish, call it again with `enabled: "false"` so the developer can type with their own keyboard (details in `dart-mcp`). Record in the note which steps need typing.
+Text entry steps (Flutter): the app's `main` must start with `enableFlutterDriverExtension(enableTextEntryEmulation: false);`. Before typing, call `flutter_driver_command` `set_text_entry_emulation` with `enabled: "true"`; when you are done typing, and always before you finish, call it again with `enabled: "false"` so the developer can type with their own keyboard (details in `dart-mcp`). Record in the note which steps need typing. Outside Flutter (web or mobile automation) there is no such switch: use the tool's own typing command, and note whether the field has a mask or autocomplete that changes the text.
 
 ### 2. When to write a note
 
@@ -31,26 +31,26 @@ One file per target screen or state, named after it in kebab-case (`order-pickin
 ```markdown
 # <Screen or state name>
 
-Route / widget: <route name or page class, and the key to wait for>
+Route / widget: <route name, page class or component, and the key or selector to wait for>
 Platforms and size: <where this route exists, window size or orientation if it matters>
 
 ## Preconditions
 - <profile, data, flags, settings needed; describe how to create them, never include real credentials>
 
 ## Steps
-1. <action> using <finder: key / text / tooltip / type> -> <what you should see, the key to wait for>
+1. <action> using <finder: key / text / tooltip / type / `data-testid` / role> -> <what you should see, the key to wait for>
 2. ...
 
 ## Pitfalls
 - <dead end you hit and why it fails, hidden controls, needed waits, state that breaks the route>
 
 ## Verified
-<date>, <platform and size>, <how: driver commands via DTD / integration test helper>
+<date>, <platform and size>, <how: driver commands via DTD, Playwright/Cypress script, integration test helper>
 ```
 
 Rules for the content:
 
-- Use finders from the widget tree (`ByValueKey`, `ByText`, `ByTooltipMessage`, `BySemanticsLabel`); quote them exactly. Prefer keys over visible text, since text changes with data and locale.
+- Use finders or selectors taken from the UI tree itself; quote them exactly. In Flutter: `ByValueKey`, `ByText`, `ByTooltipMessage`, `BySemanticsLabel`; on the web: `data-testid`, role plus accessible name (`getByRole`), never CSS classes. Prefer stable keys/ids over visible text, since text changes with data and locale.
 - Say what confirms each step worked, so the next agent notices a wrong turn immediately.
 - State the preconditions and how to satisfy them (test profile, seed data location, the step that creates it). Never write passwords, tokens or real customer data into a note; point to where the project keeps its test fixtures.
 - Keep it short and imperative. Describe the route, not the screen's design.

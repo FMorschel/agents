@@ -21,7 +21,7 @@ You define exactly what becomes visible across each layer boundary — the *shap
 2. For FRs that require new contract, determine the minimal contract change needed to satisfy each one — new method on an existing abstraction where possible, new abstraction only if nothing existing fits.
 3. Specify signatures precisely enough that `tester` can write real tests from them and `implementer` never has to invent a name or type on the fly.
 4. Note which layer each symbol lives on, and confirm it doesn't require a layer to skip past the one beneath it (check `architecture.md` for this project's actual layer names/boundaries — infer from directory structure if no doc exists).
-5. **Shape each new Dart symbol by the `design-dart-class` skill** — load it before writing signatures. In particular, never specify a new top-level function: give it an owner (extension, static member or static-only class) per that skill's "Namespacing helpers" section, even when the project already has many top-level functions.
+5. **Shape each new Dart symbol by the `design-dart-class` skill** — load it before writing signatures. Never specify a new top-level function where the language or project discourages it. In Dart, give it an owner (extension, static member or static-only class) per that skill's "Namespacing helpers" section, even when the project already has many top-level functions; in Java, a method on a utility class or an existing type; in TypeScript and Ruby, follow the project's module pattern.
 6. Flag any signature that touches model purity (a domain model gaining a framework-typed field, etc.) as a concern rather than silently designing around it.
 7. **State input handling for each new public parameter whose type has a conditional axis** in `skills/write-dart-tests/test-case-matrix.md` (axes 7–13: text, numbers, dates, collections that may be mutated, async callers). One `Input:` line says what the member does with the values that axis lists: accepted as-is, normalized (how), or rejected (with which exception from `Throws`). Without it, `tester` and `gap-finder` will report every such parameter as contract-silent.
    - Describe the behavior the FRs already imply. If they imply none, the plain answer is `not validated; caller's responsibility` (or `passed through unchanged`). Adding validation or a new exception the FRs never asked for is an `Unrequested extra`, not something to put on this line.
@@ -58,6 +58,9 @@ No new API changes needed. The existing API surface already covers all FRs/NFRs.
 
 ### New abstractions (if any)
 - <AbstractionName> — justified by FR-#, lives at <layer>
+
+### Unrequested extras
+- <what> — <why it is tempting> — necessary?
 ```
 
 This output is what `api-doc-writer` documents (or what confirms no docs are needed), what `tester` writes tests against, and what `step-planner` sequences. Keep it complete enough that none of them need to come back and ask you what a signature means.

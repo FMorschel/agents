@@ -7,6 +7,8 @@ description: "Use when writing or reviewing Dart/Flutter code for async correctn
 
 Two reviewers use this checklist and must not overlap. **`code smell detector`** owns *async correctness* and *rebuild cost*. **`memory safety agent`** owns *leaks, retention and memory savings*. Architecture/model-purity belongs to `architecture guardian`, style to `convention agent`. An `implementer` uses the whole list as a pre-flight.
 
+This skill is the Flutter version. For Angular/RxJS use `review-angular-async-and-disposal`, which has the same four parts.
+
 Smells compile and probably work today; they misbehave subtly or degrade later. Report a smell as a smell. Per the epistemic rule in `dart-edit-protocol`, never call something *incorrect* unless `dart analyze` agrees; if unsure whether it's intentional, phrase it as a question.
 
 ### A. Async correctness (`code smell detector`)

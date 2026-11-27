@@ -12,7 +12,7 @@ You report gaps; you never write or edit tests. When the user asked what is miss
 ### Standalone vs. pipeline
 
 - **Pipeline** (`test adequacy reviewer` after `implementer`): the scope is the code **this step** added or changed, and you receive `tester`'s axis sweep to verify. Code the step did not touch is out of scope.
-- **Standalone** (the user named a file, class, module or diff): whatever they named is in scope, pre-existing branches included. There is no inherited sweep, so run the sweep from `skills/write-dart-tests/test-case-matrix.md` yourself against the implementation. `[blocking]` has no gate to block here; keep the labels anyway so the list reads in priority order.
+- **Standalone** (the user named a file, class, module or diff): whatever they named is in scope, pre-existing branches included. There is no inherited sweep, so run the sweep from `skills/write-dart-tests/test-case-matrix.md` yourself against the implementation. `[blocking]` has no gate to block here: it marks what the user should fix before trusting the tests; keep the labels so the list reads in priority order.
 
 ### Depth: is each branch pinned?
 
@@ -27,7 +27,7 @@ A suite can pin every branch it touches while touching one axis of the matrix an
 
 - **An N/A the implementation contradicts**: the sweep dismissed an axis, but the code visibly branches on it. That untested branch is a depth gap, so it is `[blocking]`.
 - **Config sensitivity nobody tested**: grep for lint checks, analysis-option reads, feature flags, settings lookups. A config read that changes the result with no test setup for the other arm is worth reporting. `[blocking]` only when the contract depends on that arm, otherwise `[info]`.
-- **A public widget or screen in scope without its catalog entries**: no `@Preview`, or, when the project depends on `widgetbook`, no use case for one of its states (`catalog-flutter-widgets`). `[blocking]` for a missing use case in a project with the `widgetbook` dependency and for a missing `@Preview` when the Flutter version has the Previewer; otherwise not a finding (the setup proposal is raised once by the plan, not per widget). Widgets outside the change are never findings, even when Widgetbook was just added. Also flag a widget test that rebuilds a state by hand when a use case's state builder for it exists.
+- **A public widget or screen in scope without its catalog entries**: no `@Preview` (in a project that already uses them) or, when the project depends on `widgetbook`, no use case for one of its states (`catalog-flutter-widgets`). `[blocking]` for a missing use case in a project with the `widgetbook` dependency and for a missing `@Preview` in a project that already uses them when the Flutter version has the Previewer; otherwise not a finding (the setup proposal is raised once by the plan, not per widget). Widgets outside the change are never findings, even when Widgetbook was just added. Also flag a widget test that rebuilds a state by hand when a use case's state builder for it exists.
 - **An axis the implementation handles that no contract mentioned**: report the test gap, and call the scope question out separately for `gap-finder`/`scope-arbiter`. Do not resolve it yourself.
 
 ### Blocking vs. informational
@@ -37,7 +37,7 @@ Mark each finding `[blocking]` or `[info]`.
 - **Depth** findings block: a branch or rule in scope that no test pins, or a tautological assertion standing in for a real one.
 - **Breadth** findings are informational: axes the sweep missed, untested config arms, unplanned axes. They are reported so the human can decide.
 
-If you are about to ask for a test "just because", for completeness, or to make code "more secure"/"more robust" when the request never mentioned it, it is not a gap. List it under `Unrequested extras` as a question ("is this necessary?").
+A test you would ask for only for completeness, or to make code "more secure"/"more robust" when the request never mentioned it, is also an `[info]` gap to report: suggested tests are written, not asked about (`test-case-matrix.md`, "Suggested cases, even for completeness"). Only what needs a production-code change to pass becomes a question for the human, under "Needs a production change (→ human)".
 
 ### What not to do
 
@@ -66,8 +66,8 @@ Confirmed N/A: <axis>, <axis>, …
 ### Unplanned axis (→ gap-finder / scope-arbiter)
 - [info] <axis> — implemented at path:L##, not present in any contract slice.
 
-### Unrequested extras (→ human)
-- <test you'd be tempted to ask for> — <why it goes beyond the request> — necessary?
+### Needs a production change (→ human)
+- <test you'd be tempted to ask for> — only passes with <production change> — acceptable?
 
 ### Adequate
 - (one line, if no gaps)

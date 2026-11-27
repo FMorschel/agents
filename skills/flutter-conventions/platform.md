@@ -5,3 +5,5 @@
 - For everything else prefer capability or context signals: `MediaQuery`/`LayoutBuilder` for size, input and device capabilities.
 - A `Platform.isFoo` check is acceptable only for non-UI logic with no adaptive alternative (e.g. choosing a file-system or plugin backend). Guard every such check with `!kIsWeb` first (`!kIsWeb && Platform.isWindows`) so it short-circuits before `Platform` is touched on web.
 - Keep these checks out of widgets: put them in a service or data source, per the project's architecture (`layered-architecture`).
+
+If the project provides context helpers that classify platforms or capabilities, prefer them for the decisions they cover and read their local documentation for their contract and limits.

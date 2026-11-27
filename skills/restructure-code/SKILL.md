@@ -14,6 +14,6 @@ The orchestrator's *narrow: split/reorganize* route. The request is the MVC: sta
    - `convention-agent`: naming, file layout, import order.
    - `duplicate-code-detector`: only if the split could leave near-duplicate leftovers.
 4. Blocking findings (architecture violations) go back to `implementer`, then re-run the same reviewers, max 3 rounds.
-5. Tests are the proof. Do not route through `tester` unless the move changed a public contract; if it did, that is a tripwire: stop and ask.
+5. Tests are the proof. Run the tests again after the move. Do not route through `tester` unless the move changed a public contract; if it did, that is a tripwire: stop and ask.
 
 Report the moves made, review findings, and extras as questions. Offer `compose-commits`; renames and moves usually deserve their own commit separate from edits.

@@ -14,13 +14,13 @@ Read `write-dart-tests` first; it covers file placement, naming, assertions and 
 | A widget shows/hides/enables something, reacts to a tap, calls a callback | **Widget test** (`testWidgets`) | default choice; fast, no device |
 | A widget's *look* must not drift (layout, color, spacing, theme variants) | **Golden test** (`matchesGoldenFile`) | in addition to behavior assertions, never instead of them |
 | A flow crosses screens, routing, real DI, storage or the backend | **Integration test** (`integration_test`) | slow; only for flows, never for single-widget logic |
-| A new public widget or screen, at every size, text scale, theme and direction | **Widgetbook use case** (+ `@Preview`) | always, for every new public widget; its state builders feed the tests above (`catalog-flutter-widgets`) |
+| The project keeps a component catalog (Widgetbook, `@Preview`) | Follow the project's catalog convention | Reuse its state builders in the tests above if that is the existing pattern; do not introduce a catalog just for testing. Where the project has one, a new public widget or screen gets its entries (`catalog-flutter-widgets`). |
 
 Logic that can be tested without a widget (a view model, a controller, a formatter) belongs in a plain unit test. Do not pump a widget to test a function.
 
 ### Widget tests
 
-- **Pump the catalog's states.** When the widget has Widgetbook use cases, pump the same state builders they wrap instead of re-assembling the widget in the test (`catalog-flutter-widgets`, Use cases as test fixtures). A state you need that the catalog lacks is added to both.
+- **Reuse the project's catalog, if there is one.** When the project keeps a component catalog (Widgetbook use cases) and the widget has entries in it, pump the same state builders they wrap instead of re-assembling the widget in the test (`catalog-flutter-widgets`, Use cases as test fixtures). A state you need that the catalog lacks can be added to both, following the project's conventions. With no catalog, build the states in the test; do not introduce one just for testing.
 - **Build the smallest tree that works.** Wrap the widget in `MaterialApp` (or the app's own themed wrapper) and a `Scaffold`; add providers and navigator keys only when the widget needs them. Put the wrapper in one `_buildApp` / `_pump` helper in the file so each test states only what varies.
 - **Names state the behavior and the condition**, in the language and pattern the neighboring tests use (for example `DEVE exibir X QUANDO Y` / `NÃO DEVE ... QUANDO ...` when that is the repo's style).
 - **Both sides of each condition**: shown and not shown, enabled and disabled, one case per value of an enum (a table of cases, so a failure names its row).
@@ -48,7 +48,7 @@ An axis the design never specifies (what RTL should look like, whether a name ma
 
 ### Accessibility
 
-Every new screen and public widget gets one accessibility test, and is also reviewed by eye through its Widgetbook entry and `@Preview` (`catalog-flutter-widgets`).
+Every new screen and public widget gets one accessibility test; where the project has a catalog, it is also reviewed by eye through the widget's Widgetbook entry and `@Preview` (`catalog-flutter-widgets`).
 
 - Assert the guidelines with a `SemanticsHandle` held for the test (`final handle = tester.ensureSemantics(); addTearDown(handle.dispose);`): `meetsGuideline(textContrastGuideline)`, `androidTapTargetGuideline`, `iOSTapTargetGuideline` and `labeledTapTargetGuideline`.
 - Icon-only buttons and meaningful images have a semantics label or tooltip, asserted with `find.bySemanticsLabel` or `find.byTooltip`.
@@ -79,4 +79,4 @@ Every new screen and public widget gets one accessibility test, and is also revi
 
 ### Before reporting done
 
-Run the new tests and their neighbors with `flutter test <paths>` (there is no MCP tool for it), then follow `dart-edit-protocol` for fix, format and analyze. A UI test you have not run is a draft. A new public widget or screen is not covered until its Widgetbook use cases and `@Preview` exist and build (`catalog-flutter-widgets`). For appearance changes also run `review-flutter-visual-changes`.
+Run the new tests and their neighbors with `flutter test <paths>` (there is no MCP tool for it), then follow `dart-edit-protocol` for fix, format and analyze. A UI test you have not run is a draft. In a project that keeps a component catalog, a new public widget or screen is not covered until its Widgetbook use cases and `@Preview` exist and build (`catalog-flutter-widgets`). For appearance changes also run `review-flutter-visual-changes`.
